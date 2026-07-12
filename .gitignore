@@ -1,0 +1,43 @@
+# Per-user vault config — NEVER commit (holds each person's real vault_path)
+.claude/knowledge-base.local.md
+knowledge-base.local.md
+
+# Maintainer's private denylist for the secret guard — NEVER commit
+scripts/.no-secrets-denylist.txt
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Node.js (CI tooling / guard scripts only)
+node_modules/
+*.tgz
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv*/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Connector state / cache / logs (runtime, per-user)
+cache/
+*.log
+connectors/**/state/
+*-sync-state.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+.coverage

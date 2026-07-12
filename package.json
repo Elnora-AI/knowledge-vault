@@ -1,0 +1,24 @@
+{
+  "name": "knowledge-vault",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Obsidian vault power tools for Claude Code — tooling and CI for the knowledge-base plugin marketplace.",
+  "license": "Apache-2.0",
+  "author": "Elnora AI <opensource@elnora.ai> (https://github.com/Elnora-AI)",
+  "homepage": "https://github.com/Elnora-AI/knowledge-vault",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elnora-AI/knowledge-vault.git"
+  },
+  "type": "module",
+  "scripts": {
+    "check:secrets": "node scripts/check-no-secrets.mjs",
+    "check:json": "node scripts/check-json.mjs",
+    "test:node": "node --test",
+    "test:py": "python3 -m pytest -q || python -m pytest -q",
+    "check": "npm run check:secrets && npm run check:json"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

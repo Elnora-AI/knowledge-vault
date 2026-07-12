@@ -1,0 +1,25 @@
+{
+  "source_name": "json",
+  "source_folder": "/path/to/exported/records",
+
+  "owner_name": "Your Name",
+  "owner_slug": "your-name",
+  "owner_email_domains": ["example.com"],
+
+  "routes": {
+    "call": "meetings",
+    "meeting-transcript": "meetings"
+  },
+  "default_route": "meetings",
+  "year_bucket_default": true,
+
+  "min_age_minutes": 0,
+  "max_age_days": 30,
+
+  "llm_enabled": false,
+  "llm_model": "claude-sonnet-5",
+
+  "_comment_vault_root": "The vault root is read from .claude/knowledge-base.local.md. Set 'vault_root' here only to override it.",
+  "_comment_quill": "For the Quill adapter, set source_name to 'quill' and (optionally) source_db_path.",
+  "_comment_llm": "LLM formatting is optional. When llm_enabled is true, provide ANTHROPIC_API_KEY in the environment."
+}
