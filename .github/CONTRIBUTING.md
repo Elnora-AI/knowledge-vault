@@ -18,7 +18,7 @@ node scripts/check-json.mjs
 
 # Python lint + tests
 python -m pip install ruff pytest
-ruff check hooks connectors optional
+ruff check hooks connectors
 python -m pytest -q
 ```
 

@@ -2,7 +2,7 @@
 name: task-done
 description: Mark a task as done, cancelled, or move between task states
 argument-hint: <task description or search> [--cancel] [--start] [--todo]
-allowed-tools: Read, Edit, Glob, Grep, Bash
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # Move Task: $ARGUMENTS
@@ -38,42 +38,31 @@ Full path to any task file: `{vault_path}/{task_xxx}` — prepend `{vault_dir}` 
 ### Step 4: Move the Task
 
 1. **Remove** the task line, its sub-tasks, AND any indented metadata lines (e.g., `- source::`) from the source file using `Edit`
-2. **Add** the complete task block (task line + metadata lines) to the destination file:
+2. **If the destination file does not exist**, create it first with `Write` using a minimal header (this is normal, not an error):
+
+   ```markdown
+   ---
+   title: Done
+   type: task-list
+   ---
+
+   # Done
+   ```
+
+   (Use the matching title: To Do / In Progress / Done / Cancelled.)
+3. **Add** the complete task block (task line + metadata lines) to the destination file:
    - For `done.md`: change checkbox to `[x]`, append `✅ completed {today's date}`
    - For `cancelled.md`: change checkbox to `[-]`, append `❌ cancelled {today's date} — {reason if provided}`
    - For `in-progress.md`: change checkbox to `[/]`
    - For `to-do.md`: keep checkbox as `[ ]`
-3. Place it under the matching `## Section` in the destination file, or create the section if needed
+4. Place it under the matching `## Section` if the file uses sections; if it has none, append at the end under the `# H1`.
 
-### Step 5: Optional CRM writeback (off by default)
-
-This step is **optional** and applies only when transitioning a task to `done.md` AND both of the following are true:
-
-1. You maintain a contacts file (e.g. `people/contacts.csv`), and
-2. The moved task block carries CRM metadata — `contact-slug::` AND/OR `crm-action::` lines.
-
-If either is not true, **skip this step entirely** — the task system works fully without any CRM linkage. The writeback CLI ships under the plugin's `optional/` directory and **may not be installed**; if it is missing, skip this step.
-
-When it does apply, call the writeback CLI to update your contacts file:
-
-```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/optional/cli/task_done_crm_writeback.py \
-  --contact-slug <slug> [--crm-action <action_key>] --compact \
-  || python ${CLAUDE_PLUGIN_ROOT}/optional/cli/task_done_crm_writeback.py \
-  --contact-slug <slug> [--crm-action <action_key>] --compact
-```
-
-- Pass `--crm-action` only if the task line had `crm-action:: <key>`. The CLI clears `next_action` ONLY if the row's current value matches that key (fingerprint check — protects against accidental clears).
-- If only `contact-slug::` is present, omit `--crm-action`. The CLI just bumps `last_contact_date` to today with `last_contact_channel=task`.
-- Skip this step entirely for `--cancel`, `--start`, or `--todo` transitions — only run it when the destination is `done.md`.
-
-### Step 6: Confirm
+### Step 5: Confirm
 
 Report:
 - Which task was moved
 - From which file → to which file
 - The updated task line
-- If the optional CRM writeback ran, what changed (e.g. "cleared next_action=send-proposal on jane-doe; bumped last_contact_date")
 
 ## Examples
 

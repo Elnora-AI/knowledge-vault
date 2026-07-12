@@ -28,7 +28,7 @@ Include as much as you can: a description, steps to reproduce, potential impact,
 **In scope:**
 
 - The plugin content in this repository (agents, commands, skills, hooks) and how it reads config and vault files
-- The optional connector framework under `connectors/` and `optional/`
+- The optional connector framework under `connectors/`
 - The CI guards (`scripts/check-no-secrets.mjs`, `scripts/check-json.mjs`)
 
 **Out of scope:**
