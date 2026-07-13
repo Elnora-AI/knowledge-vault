@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
 Check if a Write tool call targeted the vault, and if so, update the index.
-Reads tool input from CLAUDE_TOOL_INPUT env var to get the file_path.
+Reads the file_path from the PostToolUse hook payload on stdin.
 """
 
-import os
 import sys
-import json
 import subprocess
 import tempfile
 import hashlib
@@ -14,23 +12,15 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from shared import get_vault_path
+from shared import get_vault_path, read_hook_tool_input
 
 _DEBOUNCE_SECONDS = 60
 
 
 def main():
-    # Get the file path from the tool input
-    tool_input = os.environ.get("CLAUDE_TOOL_INPUT", "")
-    if not tool_input:
-        sys.exit(0)
-
-    try:
-        data = json.loads(tool_input)
-        file_path = data.get("file_path", "")
-    except (json.JSONDecodeError, AttributeError):
-        sys.exit(0)
-
+    # Get the file path from the hook payload (stdin, env-var fallback for tests).
+    tool_input = read_hook_tool_input()
+    file_path = tool_input.get("file_path", "")
     if not file_path:
         sys.exit(0)
 

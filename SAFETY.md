@@ -1,6 +1,6 @@
 # Safety guardrails
 
-This plugin operates on your local filesystem — an Obsidian vault or a folder of markdown. It has no network surface, no credentials, and no server. The guardrails below keep a prompt-injected agent from doing anything irreversible and keep your private data out of version control.
+This plugin operates on your local filesystem — an Obsidian vault or a folder of markdown. Its own scripts and hooks have no network surface, no credentials, and no server; the only network access anywhere in the plugin is the `/note` command, which uses Claude Code's built-in `WebFetch` on a URL you provide. The guardrails below keep a prompt-injected agent from doing anything irreversible and keep your private data out of version control.
 
 ## No destructive writes
 
@@ -11,7 +11,7 @@ This plugin operates on your local filesystem — an Obsidian vault or a folder 
 ## Your data stays private
 
 - **`vault_path` is gitignored.** The per-user config `.claude/knowledge-base.local.md` — the only place your real vault path lives — is gitignored by this repo and should be gitignored in your project too. It is never committed and never transmitted.
-- **No secrets, no network.** The core plugin makes no network calls and stores no credentials. It reads and writes markdown on your disk. There is nothing to leak.
+- **No stored secrets.** The plugin's own scripts and hooks make no network calls and store no credentials — they only read and write markdown on your disk. The one exception is the `/note` command, which uses Claude Code's built-in `WebFetch` on the URL you provide; it stores no credentials either. There is nothing to leak.
 - **Config is read with a targeted parser.** Hooks read individual config keys with a scoped regex, so nothing else in the file is interpreted or executed.
 
 ## Path handling
@@ -25,7 +25,6 @@ The [`connectors/`](connectors/) framework is **off by default** and not loaded 
 
 - A connector reads from a source you configure (e.g. a local app database) and writes formatted notes into your vault. Source adapters should open external data **read-only** (the bundled Quill reference adapter opens its SQLite database with `mode=ro`).
 - LLM formatting, if enabled, uses your own `ANTHROPIC_API_KEY` (or an equivalent you configure) via environment variables — never committed, never logged.
-- The optional CRM/contacts hook is **off by default**; when enabled it sanitizes CSV writes against formula injection and writes atomically (temp file + rename).
 
 ## Publication safety
 

@@ -84,15 +84,15 @@ If none of the above fit, prefer `draft` while shaping, then move to a more spec
 | `type` | string | `meeting-transcript` | Always `meeting-transcript` |
 | `title` | string | `"Acme <> Globex Partnership Discussion"` | Meeting title |
 | `status` | string | `transcribed` | Status: `transcribed`, `reviewed`, `summarized`, `archived` |
-| `created` | date | `2026-01-26` | Meeting date |
-| `updated` | date | `2026-01-26` | Last edit date |
+| `created` | date | `2026-01-15` | Meeting date |
+| `updated` | date | `2026-01-15` | Last edit date |
 | `owner` | string | `your-name` | Primary attendee/owner |
 | `tags` | array | `[sales-call, acme, product]` | Categorization tags |
 | `description` | string | `"Discussion of pilot terms..."` | Brief summary |
-| `date` | date | `2026-01-26` | Meeting date (same as created) |
-| `time` | string | `"08:13"` | Start time (HH:MM) |
-| `word_count` | integer | `6806` | Transcript word count |
-| `meeting_id` | string | `7e353e1c-...` | Source system ID (transcript source ID) |
+| `date` | date | `2026-01-15` | Meeting date (same as created) |
+| `time` | string | `"09:00"` | Start time (HH:MM) |
+| `word_count` | integer | `5000` | Transcript word count |
+| `meeting_id` | string | `11111111-...` | Source system ID (transcript source ID) |
 | `meeting_type` | string | `sales-call` | Meeting category (see values below) |
 | `participants` | array | `["Jane Doe", "Sam Rivera"]` | Attendee names |
 
@@ -100,8 +100,8 @@ If none of the above fit, prefer `draft` while shaping, then move to a more spec
 
 | Field | Type | Example | Description |
 |-------|------|---------|-------------|
-| `end_time` | string | `"09:45"` | End time (HH:MM) |
-| `duration_minutes` | integer | `92` | Meeting duration |
+| `end_time` | string | `"10:00"` | End time (HH:MM) |
+| `duration_minutes` | integer | `60` | Meeting duration |
 | `companies` | array | `["Acme Corp", "Globex"]` | External companies involved |
 | `platform` | string | `zoom` | Meeting platform |
 | `recording_available` | boolean | `true` | Whether audio exists |
@@ -154,8 +154,8 @@ related:
 type: meeting-transcript
 title: "Acme <> Globex Partnership Discussion"
 status: reviewed
-created: 2026-01-26
-updated: 2026-01-26
+created: 2026-01-15
+updated: 2026-01-15
 owner: your-name
 tags:
   - sales-call
@@ -163,12 +163,12 @@ tags:
   - partnership
   - globex
 description: "Discussion of Acme pilot planning and integration with Globex"
-date: 2026-01-26
-time: "08:13"
-end_time: "09:45"
-duration_minutes: 92
-word_count: 6806
-meeting_id: 7e353e1c-f464-4804-b7ca-877e9ba5388d
+date: 2026-01-15
+time: "09:00"
+end_time: "10:00"
+duration_minutes: 60
+word_count: 5000
+meeting_id: 11111111-2222-4333-8444-555555555555
 meeting_type: sales-call
 participants:
   - Jane Doe

@@ -8,7 +8,7 @@
 
 ## Install
 
-The knowledge-base plugin is pure Claude Code content — no CLI, no build step, no dependencies. Two slash commands and you're done. Run them **one at a time** (paste the first, hit enter, wait, then the second):
+The knowledge-base plugin is pure Claude Code content — no CLI, no build step, no dependencies. Two commands to install, one to configure. Run the two install commands **one at a time** (paste the first, hit enter, wait, then the second):
 
 ```
 /plugin marketplace add Elnora-AI/knowledge-vault
@@ -121,7 +121,7 @@ gw calendar sync-crm-install  # schedule calendar → CRM
 
 ## Safety
 
-Read [`SAFETY.md`](SAFETY.md). In short: a write hook only ever *reads* your config, the plugin never deletes or overwrites documents (it versions them), your real `vault_path` is gitignored, and no secrets are stored or transmitted — the plugin talks to your local filesystem, nothing else.
+Read [`SAFETY.md`](SAFETY.md). In short: a write hook only ever *reads* your config, the plugin never deletes or overwrites documents (it versions them), your real `vault_path` is gitignored, and no secrets are stored or transmitted. The plugin's scripts and hooks talk to your local filesystem only; the sole exception is `/note`, which uses Claude Code's built-in `WebFetch` on the URL you provide.
 
 ---
 
