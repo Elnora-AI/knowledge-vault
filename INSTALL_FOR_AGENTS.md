@@ -49,5 +49,5 @@ If all three succeed, the install is complete. Report the vault path, the folder
 
 ## Notes
 
-- The core plugin has **no external dependencies** and makes **no network calls** — it operates on the local vault only.
+- The core plugin has **no external dependencies**. Its scripts and hooks make **no network calls** and operate on the local vault only; the one command that reaches the network is `/note`, which uses Claude Code's built-in `WebFetch` on the URL the user provides.
 - Connectors under `connectors/` are optional and off by default; do not install or enable them unless the user asks.

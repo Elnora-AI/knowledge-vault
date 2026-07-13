@@ -6,14 +6,12 @@ to remove it from inbox — tasks must be MOVED, not copied.
 Also checks the reverse: task added to to-do.md but still in inbox.md.
 """
 
-import json
-import os
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from shared import get_vault_root, get_config_value
+from shared import get_vault_root, get_config_value, read_hook_tool_input
 
 
 def _get_task_dir() -> Path | None:
@@ -47,16 +45,9 @@ def _extract_task_descriptions(text: str) -> list[str]:
 
 
 def main():
-    tool_input = os.environ.get("CLAUDE_TOOL_INPUT", "")
-    if not tool_input:
-        sys.exit(0)
-
-    try:
-        data = json.loads(tool_input)
-        file_path = data.get("file_path", "")
-    except (json.JSONDecodeError, AttributeError):
-        sys.exit(0)
-
+    # Read the hook payload from stdin (env-var fallback for tests).
+    tool_input = read_hook_tool_input()
+    file_path = tool_input.get("file_path", "")
     if not file_path:
         sys.exit(0)
 
@@ -85,7 +76,7 @@ def main():
         sys.exit(0)
 
     # Check what was just written — look at new_string (Edit) or content (Write)
-    new_content = data.get("new_string", "") or data.get("content", "")
+    new_content = tool_input.get("new_string", "") or tool_input.get("content", "")
     added_tasks = _extract_task_descriptions(new_content)
 
     if not added_tasks:

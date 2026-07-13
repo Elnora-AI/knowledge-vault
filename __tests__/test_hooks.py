@@ -1,6 +1,11 @@
 """Tests for the hook scripts: config resolution and index generation."""
 
 import importlib.util
+import io
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -13,6 +18,35 @@ def _load(name, filename):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def _hook_payload(tool_name, tool_input):
+    """A PostToolUse payload in the exact shape Claude Code writes to hook stdin."""
+    return {
+        "session_id": "test-session",
+        "transcript_path": "/tmp/transcript.jsonl",
+        "cwd": "/tmp",
+        "hook_event_name": "PostToolUse",
+        "tool_name": tool_name,
+        "tool_input": tool_input,
+        "tool_response": {"success": True},
+    }
+
+
+def _run_hook(script, payload, project):
+    """Invoke a hook script the way the harness does: JSON payload on stdin."""
+    env = {**os.environ, "CLAUDE_PROJECT_DIR": str(project)}
+    # Guarantee the stdin path is what's exercised, not the env-var fallback.
+    env.pop("CLAUDE_TOOL_INPUT", None)
+    return subprocess.run(
+        [sys.executable, str(HOOKS / script)],
+        input=json.dumps(payload),
+        text=True,
+        capture_output=True,
+        cwd=str(project),
+        env=env,
+        timeout=60,
+    )
 
 
 def _make_project(tmp_path, vault_rel="my-vault", extra=""):
@@ -147,3 +181,63 @@ def test_index_excludes_dot_folders(tmp_path, monkeypatch):
     all_paths = [d["path"] for items in docs.values() for d in items]
     assert "notes/keep.md" in all_paths
     assert not any(".obsidian" in p for p in all_paths)
+
+
+# ---------------------------------------------------------------------------
+# PostToolUse hook input: read the real stdin payload, not a nonexistent env var
+# ---------------------------------------------------------------------------
+
+def test_read_hook_tool_input_from_stdin(monkeypatch):
+    # Claude Code delivers the whole payload as JSON on stdin; the helper must
+    # unwrap the nested `tool_input` object.
+    shared = _load("shared", "shared.py")
+    payload = _hook_payload("Write", {"file_path": "/vault/notes/x.md", "content": "hi"})
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(payload)))
+    monkeypatch.delenv("CLAUDE_TOOL_INPUT", raising=False)
+    assert shared.read_hook_tool_input() == {"file_path": "/vault/notes/x.md", "content": "hi"}
+
+
+def test_read_hook_tool_input_env_fallback(monkeypatch):
+    # With no stdin payload, tests may supply a bare tool_input via the env var.
+    shared = _load("shared", "shared.py")
+    monkeypatch.setattr(sys, "stdin", io.StringIO(""))
+    monkeypatch.setenv("CLAUDE_TOOL_INPUT", json.dumps({"file_path": "/a/b.md"}))
+    assert shared.read_hook_tool_input() == {"file_path": "/a/b.md"}
+
+
+def test_check_vault_write_rebuilds_index_from_stdin(tmp_path):
+    # A write inside the vault, delivered as a real stdin payload, must trigger
+    # the forced index rebuild (proves the hook parses tool_input.file_path).
+    project, vault = _make_project(tmp_path)
+    payload = _hook_payload(
+        "Write", {"file_path": str(vault / "notes" / "new-doc.md"), "content": "# New Doc\n"}
+    )
+    result = _run_hook("check-vault-write.py", payload, project)
+    assert result.returncode == 0, result.stderr
+    assert (vault / "notes" / "index.md").exists()
+
+
+def test_check_vault_write_ignores_outside_vault(tmp_path):
+    # A write outside the vault must not rebuild anything.
+    project, vault = _make_project(tmp_path)
+    outside = tmp_path / "elsewhere" / "note.md"
+    payload = _hook_payload("Write", {"file_path": str(outside), "content": "x"})
+    result = _run_hook("check-vault-write.py", payload, project)
+    assert result.returncode == 0, result.stderr
+    assert not (vault / "notes" / "index.md").exists()
+
+
+def test_check_task_move_warns_from_stdin(tmp_path):
+    # A task copied into done.md while still in inbox.md must warn — driven by
+    # the real stdin payload, not the (nonexistent) CLAUDE_TOOL_INPUT env var.
+    project, vault = _make_project(tmp_path)
+    tasks = vault / "tasks"
+    tasks.mkdir()
+    (tasks / "inbox.md").write_text("- [ ] #task buy milk tomorrow\n", encoding="utf-8")
+    payload = _hook_payload(
+        "Write",
+        {"file_path": str(tasks / "done.md"), "content": "- [x] #task buy milk tomorrow\n"},
+    )
+    result = _run_hook("check-task-move.py", payload, project)
+    assert result.returncode == 0, result.stderr
+    assert "TASK MOVE INCOMPLETE" in result.stderr

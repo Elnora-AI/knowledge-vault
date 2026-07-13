@@ -22,12 +22,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_TOOL_INPUT=\"${TOOL_INPUT}\" python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-vault-write.py\" || CLAUDE_TOOL_INPUT=\"${TOOL_INPUT}\" python \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-vault-write.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-vault-write.py\" || python \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-vault-write.py\"",
             "timeout": 60000
           },
           {
             "type": "command",
-            "command": "CLAUDE_TOOL_INPUT=\"${TOOL_INPUT}\" python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-task-move.py\" || CLAUDE_TOOL_INPUT=\"${TOOL_INPUT}\" python \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-task-move.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-task-move.py\" || python \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-task-move.py\"",
             "timeout": 10000
           }
         ]
