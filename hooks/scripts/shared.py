@@ -1,12 +1,56 @@
 #!/usr/bin/env python3
 """Shared utilities for knowledge-base hook scripts. Cross-platform."""
 
+import json
 import os
 import re
+import sys
 from pathlib import Path
 
 
 CONFIG_REL = Path(".claude") / "knowledge-base.local.md"
+
+
+def _read_stdin_json():
+    """Read the hook payload from stdin, or "" when stdin is unavailable.
+
+    Guards against an interactive TTY (which would block on read) and against
+    pytest's captured stdin (which raises on read).
+    """
+    try:
+        stdin = sys.stdin
+        if stdin is None or stdin.isatty():
+            return ""
+        return stdin.read()
+    except (OSError, ValueError):
+        return ""
+
+
+def read_hook_tool_input():
+    """Return the PostToolUse hook's ``tool_input`` dict.
+
+    Claude Code delivers the hook payload as JSON on stdin, shaped like
+    ``{"tool_name": ..., "tool_input": {...}, "tool_response": {...}}``. We
+    read stdin first, then fall back to the ``CLAUDE_TOOL_INPUT`` env var
+    (used by tests). Either source may carry the full payload or a bare
+    ``tool_input`` object; the former is unwrapped. Returns ``{}`` when
+    nothing usable is available.
+    """
+    raw = _read_stdin_json()
+    if not raw.strip():
+        raw = os.environ.get("CLAUDE_TOOL_INPUT", "")
+    if not raw.strip():
+        return {}
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    tool_input = data.get("tool_input")
+    if isinstance(tool_input, dict):
+        return tool_input
+    return data
 
 
 def _config_path():
