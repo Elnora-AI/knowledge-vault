@@ -17,6 +17,14 @@ task_cancelled: tasks/cancelled.md
 notes_dir: notes
 index_file: notes/index.md
 
+# Auto-index cadence. The index is rebuilt on session start at most once per
+# `index_refresh_hours` (default 24), in a detached background process so it
+# never blocks startup. Raise it for a large or cloud-synced vault; the
+# post-write hook keeps the index fresh while you work regardless. Set
+# `index_async: false` to rebuild synchronously instead.
+index_refresh_hours: 24
+index_async: true
+
 # Cosmetic defaults (leave empty to omit).
 vault_title: Knowledge Base
 default_owner: ""
@@ -58,6 +66,8 @@ at wherever that folder is mounted on this machine, for example
 | `task_inbox` … `task_cancelled` | The five task files, relative to the vault root | No |
 | `notes_dir` | Folder for catch-all notes (also holds the auto-index) | No |
 | `index_file` | Path to the auto-generated vault index | No |
+| `index_refresh_hours` | Max age before a session-start index rebuild (default 24) | No |
+| `index_async` | Rebuild the index in the background so startup isn't blocked (default true) | No |
 | `vault_title` | Title written at the top of the auto-index | No |
 | `default_owner` | Default `owner:` value in new document frontmatter (empty = omit) | No |
 

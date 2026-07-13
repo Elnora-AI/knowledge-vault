@@ -104,6 +104,37 @@ def test_index_generation(tmp_path, monkeypatch):
     assert "notes/index.md" not in all_paths
 
 
+def test_index_refresh_hours_configurable(tmp_path, monkeypatch):
+    project, vault = _make_project(tmp_path, extra="index_refresh_hours: 168\n")
+    monkeypatch.chdir(project)
+    idx = _load("update_vault_index", "update-vault-index.py")
+    assert idx._refresh_hours() == 168
+
+
+def test_index_refresh_hours_defaults_and_tolerates_bad_values(tmp_path, monkeypatch):
+    project, vault = _make_project(tmp_path)  # key absent
+    monkeypatch.chdir(project)
+    idx = _load("update_vault_index", "update-vault-index.py")
+    assert idx._refresh_hours() == 24
+    project2, _ = _make_project(tmp_path / "b", extra="index_refresh_hours: notanumber\n")
+    monkeypatch.chdir(project2)
+    idx2 = _load("update_vault_index", "update-vault-index.py")
+    assert idx2._refresh_hours() == 24
+
+
+def test_index_async_toggle(tmp_path, monkeypatch):
+    # Default: async on.
+    project, _ = _make_project(tmp_path)
+    monkeypatch.chdir(project)
+    idx = _load("update_vault_index", "update-vault-index.py")
+    assert idx._async_enabled() is True
+    # Explicit false disables it.
+    project2, _ = _make_project(tmp_path / "b", extra="index_async: false\n")
+    monkeypatch.chdir(project2)
+    idx2 = _load("update_vault_index", "update-vault-index.py")
+    assert idx2._async_enabled() is False
+
+
 def test_index_excludes_dot_folders(tmp_path, monkeypatch):
     project, vault = _make_project(tmp_path)
     (vault / ".obsidian").mkdir()

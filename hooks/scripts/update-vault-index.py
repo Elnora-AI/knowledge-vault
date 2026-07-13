@@ -2,12 +2,18 @@
 """
 Update the auto-generated vault index file.
 Triggers:
-- Every 24 hours (checked on session start)
+- On session start, at most once per `index_refresh_hours` (default 24h).
+  The scan runs in a detached background process so it never blocks startup;
+  set `index_async: false` in config to run it synchronously instead.
+- On demand with --force (used by /kb-setup and the post-write hook), always
+  synchronous.
 
-The index location, title, owner, and excluded folders all come from the
-per-user config (.claude/knowledge-base.local.md). Nothing is hardcoded.
+The index location, title, owner, refresh interval, and excluded folders all
+come from the per-user config (.claude/knowledge-base.local.md). Nothing is hardcoded.
 """
 
+import os
+import subprocess
 import sys
 import re
 from datetime import datetime, timedelta
@@ -73,16 +79,56 @@ def get_excluded_folders():
     return set(DEFAULT_EXCLUDE)
 
 
+def _refresh_hours():
+    """How stale the index may get before a session-start rebuild (default 24h)."""
+    raw = get_config_value("index_refresh_hours")
+    try:
+        return max(1, int(float(raw))) if raw else 24
+    except (TypeError, ValueError):
+        return 24
+
+
 def should_update_index(index_path, force=False):
-    """Check if index should be updated (24h passed or forced)"""
+    """Check if index should be updated (interval passed or forced)."""
     if force:
         return True
     if not index_path.exists():
         return True
     mtime = datetime.fromtimestamp(index_path.stat().st_mtime)
-    if datetime.now() - mtime > timedelta(hours=24):
+    if datetime.now() - mtime > timedelta(hours=_refresh_hours()):
         return True
     return False
+
+
+def _async_enabled():
+    """Session-start rebuilds run detached unless index_async is falsy."""
+    raw = (get_config_value("index_async") or "true").strip().lower()
+    return raw not in ("false", "0", "no", "off")
+
+
+def _spawn_detached_rebuild():
+    """Launch a detached `--force` rebuild so session start never blocks.
+
+    Returns True if the child was spawned. The child inherits the environment
+    (so CLAUDE_PROJECT_DIR resolves the same config) and does the synchronous
+    scan on its own; it never re-spawns because it runs with --force.
+    """
+    kwargs = {
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+        "cwd": str(_find_project_root()),
+    }
+    if os.name == "nt":
+        # DETACHED_PROCESS | CREATE_NO_WINDOW
+        kwargs["creationflags"] = 0x00000008 | 0x08000000
+    else:
+        kwargs["start_new_session"] = True
+    try:
+        subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--force"], **kwargs)
+        return True
+    except Exception:
+        return False
 
 
 def scan_vault(vault_root, index_path=None):
@@ -316,7 +362,13 @@ def main():
         sys.exit(0)
 
     if not should_update_index(index_path, force):
-        print("Index is up to date (less than 24h old)")
+        # Fresh enough — nothing to do. Quiet: the config line above is enough.
+        sys.exit(0)
+
+    # A rebuild is due. Off the session-start path, hand it to a detached child
+    # so startup isn't blocked by scanning a large (possibly cloud-synced) vault.
+    if not force and _async_enabled() and _spawn_detached_rebuild():
+        print("Rebuilding vault index in the background…")
         sys.exit(0)
 
     vault_root = get_vault_root()
