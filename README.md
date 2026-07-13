@@ -102,6 +102,23 @@ Want meeting transcripts, call notes, or any dated records to flow into your vau
 
 ---
 
+## Supercharge with google-workspace
+
+Pair this with [`Elnora-AI/elnora-google-workspace`](https://github.com/Elnora-AI/elnora-google-workspace) and the two become one self-driving system: Gmail and Calendar feed a lightweight CRM that lives right inside your vault, kept fresh on a schedule with no manual upkeep. The vault is the memory; google-workspace is the senses.
+
+Once both are installed:
+
+```sh
+gw auth setup                 # one-time Google sign-in
+gw crm init                   # scaffold contacts.csv in <vault>/crm
+gw gmail sync-crm-install     # schedule email → CRM (mac/Windows/Linux)
+gw calendar sync-crm-install  # schedule calendar → CRM
+```
+
+`gw crm init` reads the `vault_path` from your `.claude/knowledge-base.local.md` — no extra configuration. Both plugins still work entirely on their own; this just makes them better together.
+
+---
+
 ## Safety
 
 Read [`SAFETY.md`](SAFETY.md). In short: a write hook only ever *reads* your config, the plugin never deletes or overwrites documents (it versions them), your real `vault_path` is gitignored, and no secrets are stored or transmitted — the plugin talks to your local filesystem, nothing else.
