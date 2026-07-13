@@ -39,6 +39,8 @@ const ALLOWED_ELNORA = [
   "security@elnora.ai",
   "github.com/elnora-ai",
   "elnora-ai/knowledge-vault",
+  "elnora-ai/elnora-google-workspace",
+  "elnora-google-workspace",
   "elnora ai, inc.",
   "elnora ai",
 ];
