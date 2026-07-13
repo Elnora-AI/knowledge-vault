@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-07-14
+
+- **Connectors: full automation loop.** LLM formatting upgraded to a two-call pipeline (metadata + complete verbatim transcript with an escalating token budget and transient-error retries); optional column-driven CRM stage (match by email, stamp last-contact fields, auto-create contacts + organizations, enrich notes, JSONL audit log); optional action-items-to-task-inbox stage with due-date resolution and dedup; verifier now separates `pending` and `empty_source` from real failures and matches configurable `id_keys`; new CLI commands `mark-all-done`, `resync`, `rename`, `install-schedule`, `uninstall-schedule` plus `sync --content-only` for backfills; cross-platform scheduling (launchd / Task Scheduler / cron) with secrets kept in an `env_file`, never in job definitions.
+
 ## [1.0.0]
 
 Initial release.
