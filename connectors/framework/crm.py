@@ -66,7 +66,7 @@ def _split_name(full_name: str) -> tuple[str, str]:
 
 
 def derive_name_from_email(email: str) -> str:
-    """'jane.doe@acme.com' -> 'Jane Doe'. Empty string when underivable."""
+    """'jane.doe@example.com' -> 'Jane Doe'. Empty string when underivable."""
     if "@" not in (email or ""):
         return ""
     local = email.split("@")[0]

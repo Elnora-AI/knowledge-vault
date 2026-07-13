@@ -15,7 +15,7 @@ def make_config(tmp_path, **overrides) -> ConnectorConfig:
     cfg.source_name = "json"
     cfg.owner_name = "Jane Doe"
     cfg.owner_slug = "jane-doe"
-    cfg.owner_email_domains = ["example.com"]
+    cfg.owner_email_domains = ["test.com"]  # distinct from external contacts on example.*
     for k, v in overrides.items():
         setattr(cfg, k, v)
     return cfg
@@ -37,7 +37,7 @@ def crm_config(tmp_path, **overrides) -> ConnectorConfig:
     (crm_dir / "contacts.csv").write_text(
         '"slug","first_name","last_name","email","company","role","stage",'
         '"source","last_contact_date","last_contact_channel","last_meeting_date","notes"\n'
-        '"tom-smith","Tom","Smith","tom@acme.io","Acme","CTO","lead","manual","","","",""\n',
+        '"tom-smith","Tom","Smith","tom@example.com","Acme","CTO","lead","manual","","","",""\n',
         encoding="utf-8",
     )
     (crm_dir / "companies.csv").write_text(
@@ -55,8 +55,8 @@ def crm_config(tmp_path, **overrides) -> ConnectorConfig:
 def test_match_and_stamp(tmp_path):
     cfg = crm_config(tmp_path)
     matches = crm.match_participants(
-        [Person(name="Tom Smith", email="Tom@Acme.io"),
-         Person(name="Nobody", email="no@where.org")], cfg)
+        [Person(name="Tom Smith", email="Tom@example.com"),
+         Person(name="Nobody", email="nobody@example.net")], cfg)
     assert len(matches) == 1
     assert matches[0]["slug"] == "tom-smith"
 
@@ -75,7 +75,7 @@ def test_stamp_writes_transcript_column_when_present(tmp_path):
     text[0] += ',"last_meeting_transcript"'
     text[1] += ',""'
     path.write_text("\n".join(text) + "\n", encoding="utf-8")
-    matches = crm.match_participants([Person(name="Tom", email="tom@acme.io")], cfg)
+    matches = crm.match_participants([Person(name="Tom", email="tom@example.com")], cfg)
     crm.stamp_matches(matches, "2026-03-10", "meetings/2026/x.md", cfg)
     assert "meetings/2026/x.md" in path.read_text(encoding="utf-8")
 
@@ -87,7 +87,7 @@ def test_stamp_writes_transcript_column_when_present(tmp_path):
 def test_create_contact_and_org(tmp_path):
     cfg = crm_config(tmp_path)
     enrichment = [{
-        "name": "Ada Lovelace", "email": "ada@globex.com", "category": "contact",
+        "name": "Ada Lovelace", "email": "ada@example.org", "category": "contact",
         "role": "VP Eng", "organization": "Globex", "notes": "Wants a pilot in Q3.",
     }]
     summary = crm.create_or_enrich(enrichment, [], "2026-03-10",
@@ -110,8 +110,8 @@ def test_create_contact_and_org(tmp_path):
 
 def test_enrich_existing_is_idempotent(tmp_path):
     cfg = crm_config(tmp_path)
-    matches = crm.match_participants([Person(name="Tom Smith", email="tom@acme.io")], cfg)
-    enrichment = [{"name": "Tom Smith", "email": "tom@acme.io", "category": "contact",
+    matches = crm.match_participants([Person(name="Tom Smith", email="tom@example.com")], cfg)
+    enrichment = [{"name": "Tom Smith", "email": "tom@example.com", "category": "contact",
                    "role": "CTO", "organization": "Acme", "notes": "Budget approved."}]
     s1 = crm.create_or_enrich(enrichment, matches, "2026-03-10", "x.md", "Call", cfg)
     assert s1["enriched"] == 1
@@ -124,8 +124,8 @@ def test_enrich_existing_is_idempotent(tmp_path):
 def test_internal_and_unknown_skipped(tmp_path):
     cfg = crm_config(tmp_path)
     enrichment = [
-        {"name": "Jane Doe", "email": "jane@example.com", "category": "contact"},  # internal domain
-        {"name": "Mystery", "email": "m@x.org", "category": "unknown"},  # unmapped category
+        {"name": "Jane Doe", "email": "jane@test.com", "category": "contact"},  # internal domain
+        {"name": "Mystery", "email": "mystery@example.net", "category": "unknown"},  # unmapped category
         {"name": "No Email", "email": "", "category": "contact"},
     ]
     summary = crm.create_or_enrich(enrichment, [], "2026-03-10", "x.md", "Call", cfg)
@@ -134,7 +134,7 @@ def test_internal_and_unknown_skipped(tmp_path):
 
 def test_formula_injection_sanitized(tmp_path):
     cfg = crm_config(tmp_path)
-    enrichment = [{"name": "=cmd Bad", "email": "bad@globex.com", "category": "contact",
+    enrichment = [{"name": "=cmd Bad", "email": "bad@example.org", "category": "contact",
                    "organization": "", "notes": "=HYPERLINK evil"}]
     crm.create_or_enrich(enrichment, [], "2026-03-10", "x.md", "Call", cfg)
     contacts = (cfg.vault_root / "crm/contacts.csv").read_text(encoding="utf-8")
@@ -142,14 +142,14 @@ def test_formula_injection_sanitized(tmp_path):
 
 
 def test_derive_name_from_email():
-    assert crm.derive_name_from_email("tom.dexter@rho.co") == "Tom Dexter"
-    assert crm.derive_name_from_email("info@x.co") == "Info"
+    assert crm.derive_name_from_email("tom.dexter@example.com") == "Tom Dexter"
+    assert crm.derive_name_from_email("info@example.com") == "Info"
     assert crm.derive_name_from_email("not-an-email") == ""
 
 
 def test_related_links(tmp_path):
     cfg = crm_config(tmp_path)
-    matches = crm.match_participants([Person(name="Tom", email="tom@acme.io")], cfg)
+    matches = crm.match_participants([Person(name="Tom", email="tom@example.com")], cfg)
     links = crm.related_links(matches, "meetings/2026", cfg)
     assert links == ["[Tom Smith](../../crm/contacts.csv) (slug: tom-smith)"]
 
@@ -216,14 +216,14 @@ def test_parse_metadata_full(tmp_path):
         "entities": ["Globex"],
         "action_items": [{"task": "Follow up", "owner": "Jane Doe", "due_hint": "next week"},
                          "Plain string item"],
-        "enrichment": [{"name": "Ada", "email": "ada@globex.com", "category": "contact"}],
+        "enrichment": [{"name": "Ada", "email": "ada@example.org", "category": "contact"}],
     })
     fmt = _parse_metadata(f"```json\n{raw}\n```", cfg)
     assert fmt.record_type == "call"
     assert fmt.entities == ["Globex"]
     assert fmt.action_items[0].due_hint == "next week"
     assert fmt.action_items[1].task == "Plain string item"
-    assert fmt.enrichment[0]["email"] == "ada@globex.com"
+    assert fmt.enrichment[0]["email"] == "ada@example.org"
 
 
 def test_parse_metadata_unknown_type_falls_back(tmp_path):
@@ -243,7 +243,7 @@ def test_engine_stamps_crm_on_sync(tmp_path):
     (src_dir / "r1.json").write_text(json.dumps({
         "id": "r1", "title": "Acme sync", "started_at": "2026-03-10T15:00:00",
         "ready": True,
-        "participants": [{"name": "Tom Smith", "email": "tom@acme.io"}],
+        "participants": [{"name": "Tom Smith", "email": "tom@example.com"}],
         "segments": [{"speaker": "Tom Smith", "text": "Hello."}],
     }), encoding="utf-8")
 
@@ -263,7 +263,7 @@ def test_engine_content_only_skips_stages(tmp_path):
     (src_dir / "r1.json").write_text(json.dumps({
         "id": "r1", "title": "Acme sync", "started_at": "2026-03-10T15:00:00",
         "ready": True,
-        "participants": [{"name": "Tom Smith", "email": "tom@acme.io"}],
+        "participants": [{"name": "Tom Smith", "email": "tom@example.com"}],
         "segments": [{"speaker": "Tom Smith", "text": "Hello."}],
     }), encoding="utf-8")
 
