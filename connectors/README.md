@@ -42,6 +42,41 @@ python3 connectors/cli.py status       --config my-config.json
 
 `sync` writes one markdown file per record into the routed folder (default `meetings/{YYYY}/`), with frontmatter (`title`, `date`, `participants`, `record_id`, …) and `## Summary` / `## Transcript` sections.
 
+## Quick start (Quill)
+
+Full meeting-transcript automation needs exactly two installs: the [Quill](https://quill.chat) desktop app and this plugin. The connector reads Quill's local database directly (read-only) — no API keys, no account linking, no MCP server required.
+
+1. Install and use Quill — it records meetings into a local SQLite database:
+   - macOS: `~/Library/Application Support/Quill/quill.db`
+   - Windows: `%APPDATA%\Quill\quill.db`
+   - Linux: `~/.local/share/Quill/quill.db`
+
+   The connector finds it there automatically; set `source_db_path` in the config only for a non-standard location.
+2. Copy `config.example.json` (e.g. to `.claude/connectors/quill.json`) and set `"source_name": "quill"`. Everything else works with defaults; enable `llm_enabled`, `crm`, or `tasks` as desired.
+3. Run a first sync, then schedule it:
+
+```sh
+python3 connectors/cli.py sync             --config .claude/connectors/quill.json
+python3 connectors/cli.py install-schedule --config .claude/connectors/quill.json
+```
+
+That's the whole loop: every meeting Quill records lands in your vault as formatted markdown, on a schedule, with optional CRM stamping and action-item extraction.
+
+**Optional — interactive Quill tools (MCP):** separate from syncing, Quill ships its own MCP bridge inside its app-data directory (macOS: `~/Library/Application Support/Quill/mcp-stdio-bridge.js`). Register it in your project's `.mcp.json` to search meetings, fetch transcripts, and manage Quill notes/contacts from Claude conversationally:
+
+```json
+{
+  "mcpServers": {
+    "quill": {
+      "command": "node",
+      "args": ["/Users/YOU/Library/Application Support/Quill/mcp-stdio-bridge.js"]
+    }
+  }
+}
+```
+
+The connector never uses the MCP bridge; skipping this loses nothing from the sync automation.
+
 ## Write your own adapter
 
 Create `sources/mytool.py` with a class exposing four members:

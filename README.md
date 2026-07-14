@@ -108,6 +108,8 @@ On top of the core pipeline, connectors optionally give you the full automation 
 - **Verification** — an auditable `verify` command that catches missing or truncated transcripts.
 - **Scheduling** — `install-schedule` registers the sync on launchd (macOS), Task Scheduler (Windows), or cron (Linux). Set-and-forget.
 
+**Using Quill?** The full automation needs only two installs — the Quill desktop app and this plugin. The connector reads Quill's local database directly (no API keys, no MCP server needed for syncing); one config file plus `install-schedule` and every meeting flows into your vault on a schedule. Quill's own MCP bridge can additionally be registered in `.mcp.json` for interactive meeting search — optional and independent of the sync. Step-by-step: [`connectors/README.md` → Quick start (Quill)](connectors/README.md#quick-start-quill).
+
 See [`connectors/README.md`](connectors/README.md). This is entirely optional and off by default; the core plugin never depends on it.
 
 ---

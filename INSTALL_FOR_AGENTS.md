@@ -47,7 +47,19 @@ Run each and confirm the expected file change:
 
 If all three succeed, the install is complete. Report the vault path, the folders created, and the three smoke-test results.
 
+## Step 5 (optional, only if the user asks) — Quill meeting-transcript automation
+
+If the user wants their Quill meetings synced into the vault, follow the gated steps below. Skip this step entirely otherwise.
+
+1. Verify Quill is installed by checking for its local database (macOS `~/Library/Application Support/Quill/quill.db`, Windows `%APPDATA%\Quill\quill.db`, Linux `~/.local/share/Quill/quill.db`). If absent, tell the user to install Quill from https://quill.chat first and stop.
+2. Copy `connectors/config.example.json` from the installed plugin to the user's project (suggested: `.claude/connectors/quill.json`) and set `"source_name": "quill"`. Ask the user before enabling `llm_enabled` (needs an `ANTHROPIC_API_KEY` via `env_file` — never inline), `crm`, or `tasks`.
+3. Run `python3 <plugin>/connectors/cli.py list-pending --config <config>` — it should list the user's recent meetings. If it errors, stop and report.
+4. Run `sync --config <config>`, then verify markdown files appeared in the vault's routed folder.
+5. If the user wants it automatic, run `install-schedule --config <config>` and verify the job registered (macOS: `launchctl list | grep knowledge-vault`; Windows: `schtasks /Query /TN knowledge-vault-quill-sync`; Linux: `crontab -l | grep knowledge-vault`).
+
+The connector reads Quill's database directly — do **not** install or require any Quill MCP server for syncing. If the user separately wants interactive Quill tools (search meetings, fetch transcripts in conversation), Quill ships an MCP bridge in the same app-data directory (`mcp-stdio-bridge.js`); register it in the project's `.mcp.json` with `command: node` and the absolute bridge path.
+
 ## Notes
 
 - The core plugin has **no external dependencies**. Its scripts and hooks make **no network calls** and operate on the local vault only; the one command that reaches the network is `/note`, which uses Claude Code's built-in `WebFetch` on the URL the user provides.
-- Connectors under `connectors/` are optional and off by default; do not install or enable them unless the user asks.
+- Connectors under `connectors/` are optional and off by default; do not install or enable them unless the user asks (see Step 5 for Quill).
