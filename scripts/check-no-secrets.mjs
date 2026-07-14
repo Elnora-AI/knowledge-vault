@@ -34,13 +34,25 @@ const TEXT_EXT = new Set([
 const SKIP_FILES = new Set(["scripts/check-no-secrets.mjs"]);
 
 // "elnora" (the maintainer brand) may appear ONLY in these metadata strings.
+// This includes the "Part of the Elnora family" cross-links to sibling public
+// repos — sanctioned publisher metadata, not company-specific config.
 const ALLOWED_ELNORA = [
   "opensource@elnora.ai",
   "security@elnora.ai",
   "github.com/elnora-ai",
+  "elnora-ai",
   "elnora-ai/knowledge-vault",
   "elnora-ai/elnora-google-workspace",
   "elnora-google-workspace",
+  "elnora-ai/elnora-slack",
+  "elnora-slack",
+  "elnora-ai/elnora-linear",
+  "elnora-linear",
+  "elnora-ai/elnora-whatsapp",
+  "elnora-whatsapp",
+  "elnora-ai/elnora-merit-aktiva",
+  "elnora-merit-aktiva",
+  "elnora family",
   "elnora ai, inc.",
   "elnora ai",
 ];
