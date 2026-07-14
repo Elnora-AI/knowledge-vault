@@ -41,7 +41,8 @@ def _yaml_quote(value: str) -> str:
     return f'"{escaped}"'
 
 
-def build_document(record: Record, fmt: FormatResult, cfg: ConnectorConfig) -> str:
+def build_document(record: Record, fmt: FormatResult, cfg: ConnectorConfig,
+                   related_links: list[str] | None = None) -> str:
     """Assemble the full markdown document (frontmatter + body)."""
     date_str = record.started_at.strftime("%Y-%m-%d") if record.started_at else ""
     time_str = record.started_at.strftime("%H:%M") if record.started_at else ""
@@ -70,9 +71,15 @@ def build_document(record: Record, fmt: FormatResult, cfg: ConnectorConfig) -> s
     if participants:
         fm.append("participants:")
         fm.extend(f"  - {_yaml_quote(p)}" for p in participants)
+    if fmt.entities:
+        fm.append("entities:")
+        fm.extend(f"  - {_yaml_quote(e)}" for e in fmt.entities)
     if fmt.action_items:
         fm.append("action_items:")
-        fm.extend(f"  - {_yaml_quote(a)}" for a in fmt.action_items)
+        fm.extend(f"  - {_yaml_quote(a.task)}" for a in fmt.action_items)
+    if related_links:
+        fm.append("related:")
+        fm.extend(f"  - {_yaml_quote(link)}" for link in related_links)
     fm.append("---")
 
     body_parts = [f"# {record.title}", ""]
@@ -87,14 +94,21 @@ def build_document(record: Record, fmt: FormatResult, cfg: ConnectorConfig) -> s
     if fmt.action_items:
         body_parts.append("## Action Items")
         body_parts.append("")
-        body_parts.extend(f"- [ ] {a}" for a in fmt.action_items)
+        for a in fmt.action_items:
+            line = f"- [ ] {a.task}"
+            if a.owner and a.owner.lower() != (cfg.owner_name or "").lower():
+                line += f" ({a.owner})"
+            if a.due_hint:
+                line += f" — {a.due_hint}"
+            body_parts.append(line)
         body_parts.append("")
     body_parts.extend(["## Transcript", "", fmt.body or record.transcript_text(), ""])
 
     return "\n".join(fm) + "\n\n" + "\n".join(body_parts)
 
 
-def write_record(record: Record, fmt: FormatResult, cfg: ConnectorConfig) -> Path:
+def write_record(record: Record, fmt: FormatResult, cfg: ConnectorConfig,
+                 related_links: list[str] | None = None) -> Path:
     """Write the record to the routed vault folder. Returns the file path."""
     date_str = record.started_at.strftime("%Y-%m-%d") if record.started_at else "undated"
     subfolder = route(fmt.record_type, cfg)
@@ -107,7 +121,7 @@ def write_record(record: Record, fmt: FormatResult, cfg: ConnectorConfig) -> Pat
     target_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = target_dir / build_filename(date_str, record.title)
-    document = build_document(record, fmt, cfg)
+    document = build_document(record, fmt, cfg, related_links=related_links)
 
     fd, tmp = tempfile.mkstemp(dir=str(target_dir), suffix=".tmp")
     try:

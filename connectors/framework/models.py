@@ -67,11 +67,22 @@ class Record:
 
 
 @dataclass
+class ActionItem:
+    """A follow-up extracted from a record."""
+
+    task: str
+    owner: str = ""
+    due_hint: str | None = None
+
+
+@dataclass
 class FormatResult:
     """The output of formatting a record — metadata plus a clean body."""
 
     summary: str = ""
     record_type: str = ""
     tags: list[str] = field(default_factory=list)
-    action_items: list[str] = field(default_factory=list)
+    action_items: list[ActionItem] = field(default_factory=list)
+    entities: list[str] = field(default_factory=list)  # external organizations mentioned
+    enrichment: list[dict[str, Any]] = field(default_factory=list)  # per-person CRM facts
     body: str = ""  # formatted transcript / content

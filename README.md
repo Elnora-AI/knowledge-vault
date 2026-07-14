@@ -98,7 +98,17 @@ Full field reference: [`settings.example.md`](settings.example.md).
 
 ## Connectors (optional)
 
-Want meeting transcripts, call notes, or any dated records to flow into your vault automatically? The [`connectors/`](connectors/) directory ships a small, source-agnostic **sync framework** — a `Source` adapter plus a `SyncEngine` that formats each record and writes it into the vault — with a **Quill** reference adapter as a worked example. Bring your own tool (Granola, Otter, Quill, …) by implementing one small `Source` interface. See [`connectors/README.md`](connectors/README.md). This is entirely optional and off by default; the core plugin never depends on it.
+Want meeting transcripts, call notes, or any dated records to flow into your vault automatically? The [`connectors/`](connectors/) directory ships a small, source-agnostic **sync framework** — a `Source` adapter plus a `SyncEngine` that formats each record and writes it into the vault — with a **Quill** reference adapter as a worked example. Bring your own tool (Granola, Otter, Quill, …) by implementing one small `Source` interface.
+
+On top of the core pipeline, connectors optionally give you the full automation loop:
+
+- **LLM formatting** — a two-call pipeline (metadata + complete verbatim transcript) that classifies each record against your routes, tags it, and extracts action items. Degrades to passthrough without an API key.
+- **CRM linking** — keep a CSV CRM inside your vault in sync with your meetings: participants are matched by email, last-contact fields stamped, unknown externals auto-created (organizations too), and per-call notes appended. Column-driven — any schema works. Pairs perfectly with the CRM that [google-workspace](#supercharge-with-google-workspace) scaffolds.
+- **Action items → task inbox** — extracted follow-ups land in your task inbox with due dates resolved and the transcript linked.
+- **Verification** — an auditable `verify` command that catches missing or truncated transcripts.
+- **Scheduling** — `install-schedule` registers the sync on launchd (macOS), Task Scheduler (Windows), or cron (Linux). Set-and-forget.
+
+See [`connectors/README.md`](connectors/README.md). This is entirely optional and off by default; the core plugin never depends on it.
 
 ---
 

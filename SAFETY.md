@@ -24,7 +24,9 @@ This plugin operates on your local filesystem — an Obsidian vault or a folder 
 The [`connectors/`](connectors/) framework is **off by default** and not loaded by the core plugin. If you enable it:
 
 - A connector reads from a source you configure (e.g. a local app database) and writes formatted notes into your vault. Source adapters should open external data **read-only** (the bundled Quill reference adapter opens its SQLite database with `mode=ro`).
-- LLM formatting, if enabled, uses your own `ANTHROPIC_API_KEY` (or an equivalent you configure) via environment variables — never committed, never logged.
+- LLM formatting, if enabled, uses your own `ANTHROPIC_API_KEY` (or an equivalent you configure) via environment variables — never committed, never logged. A connector `env_file` keeps keys in a file you control.
+- The optional CRM stage is **off by default**; when enabled it sanitizes CSV writes against formula injection, writes atomically (temp file + rename), only ever writes columns that already exist in your CSV headers, and appends every mutation to a local JSONL audit log.
+- The optional scheduling commands register jobs on your OS's native scheduler (launchd / Task Scheduler / cron) only when you run `install-schedule`, and `uninstall-schedule` removes them cleanly. Secrets are never copied into job definitions.
 
 ## Publication safety
 
