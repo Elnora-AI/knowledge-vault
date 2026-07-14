@@ -135,6 +135,16 @@ Read [`SAFETY.md`](SAFETY.md). In short: a write hook only ever *reads* your con
 
 ---
 
+## Part of the Elnora family
+
+knowledge-vault is one of a family of universal, config-driven Claude Code tools from [Elnora AI](https://github.com/Elnora-AI). Each tool works 100% standalone; install more than one and they chain automatically — with the vault as the shared memory every other tool reads from and writes to.
+
+- [**elnora-google-workspace**](https://github.com/Elnora-AI/elnora-google-workspace) — Gmail, Calendar, Drive, Docs and the rest of Google Workspace as a CLI + plugin. **Chains:** `gw crm init` reads your `vault_path` from this plugin's config and scaffolds a CSV CRM inside your vault; scheduled `gw gmail sync-crm-install` / `gw calendar sync-crm-install` jobs then feed email and meeting activity into it — the same CRM the [connectors](connectors/) framework stamps from meeting transcripts.
+- [**elnora-slack**](https://github.com/Elnora-AI/elnora-slack) — the full Slack Web API as an agent-friendly CLI. **Chains:** when you close a task with `/task-done`, the agent can pull the Slack thread where the work actually shipped and file it alongside the task as completion evidence; any Slack conversation becomes a permanent vault note via `/md`.
+- [**elnora-linear**](https://github.com/Elnora-AI/elnora-linear) — Linear issue management for Claude Code. **Chains:** mirror vault tasks into Linear issues (and back) so the five-file task system and your team's tracker stay one list, and turn action items extracted by the connectors' LLM formatting into tracked issues.
+
+Every tool follows the same contract: one-line install, nothing hardcoded, your config drives everything. Browse the whole family on the [Elnora-AI org profile](https://github.com/Elnora-AI).
+
 ## License
 
 [Apache-2.0](LICENSE). Maintained by [Elnora AI](https://github.com/Elnora-AI). Contributions welcome — see [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md).
