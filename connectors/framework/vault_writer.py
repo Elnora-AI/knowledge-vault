@@ -107,9 +107,29 @@ def build_document(record: Record, fmt: FormatResult, cfg: ConnectorConfig,
     return "\n".join(fm) + "\n\n" + "\n".join(body_parts)
 
 
+def _existing_record_id(path: Path, id_keys: list[str]) -> str | None:
+    """Read the record id from an existing file's frontmatter (any id_key)."""
+    try:
+        head = path.read_text(encoding="utf-8")[:2000]
+    except (OSError, UnicodeDecodeError):
+        return None
+    pattern = re.compile(
+        r'^(?:' + "|".join(re.escape(k) for k in id_keys) + r'):\s*"?([^"\n]+)"?\s*$',
+        re.MULTILINE,
+    )
+    m = pattern.search(head)
+    return m.group(1).strip() if m else None
+
+
 def write_record(record: Record, fmt: FormatResult, cfg: ConnectorConfig,
                  related_links: list[str] | None = None) -> Path:
-    """Write the record to the routed vault folder. Returns the file path."""
+    """Write the record to the routed vault folder. Returns the file path.
+
+    Same-day records with identical titles slug to the same filename; an
+    existing file belonging to a DIFFERENT record (or with no record id at
+    all, e.g. hand-written notes) is never overwritten — the filename gets
+    a -2/-3/… suffix instead.
+    """
     date_str = record.started_at.strftime("%Y-%m-%d") if record.started_at else "undated"
     subfolder = route(fmt.record_type, cfg)
 
@@ -121,6 +141,10 @@ def write_record(record: Record, fmt: FormatResult, cfg: ConnectorConfig,
     target_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = target_dir / build_filename(date_str, record.title)
+    stem, n = file_path.stem, 2
+    while file_path.exists() and _existing_record_id(file_path, cfg.id_keys) != record.id:
+        file_path = target_dir / f"{stem}-{n}.md"
+        n += 1
     document = build_document(record, fmt, cfg, related_links=related_links)
 
     fd, tmp = tempfile.mkstemp(dir=str(target_dir), suffix=".tmp")

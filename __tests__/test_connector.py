@@ -58,6 +58,49 @@ def test_build_document_has_frontmatter_and_sections(tmp_path):
     assert "owner: jane-doe" in doc
 
 
+def test_write_record_collision_suffixes(tmp_path):
+    """Same-day records with identical titles never clobber each other."""
+    cfg = make_config(tmp_path)
+    from connectors.framework.formatter import format_record
+    rec_a = Record(
+        id="r1", title="Touch Base", started_at=datetime(2026, 7, 14, 9, 0),
+        segments=[Segment(speaker="A", text="first call", is_owner=True)],
+    )
+    rec_b = Record(
+        id="r2", title="Touch Base", started_at=datetime(2026, 7, 14, 15, 0),
+        segments=[Segment(speaker="B", text="second call", is_owner=True)],
+    )
+    first = vault_writer.write_record(rec_a, format_record(rec_a, cfg), cfg)
+    second = vault_writer.write_record(rec_b, format_record(rec_b, cfg), cfg)
+    assert first != second
+    assert second.name == first.stem + "-2.md"
+    assert 'record_id: "r1"' in first.read_text(encoding="utf-8")
+    assert 'record_id: "r2"' in second.read_text(encoding="utf-8")
+
+    # Re-syncing the SAME record overwrites in place (no new suffix).
+    again = vault_writer.write_record(rec_a, format_record(rec_a, cfg), cfg)
+    assert again == first
+
+
+def test_write_record_never_clobbers_manual_file(tmp_path):
+    """A file without any id_key frontmatter (hand-written) is left alone."""
+    cfg = make_config(tmp_path)
+    from connectors.framework.formatter import format_record
+    rec = Record(
+        id="r1", title="Touch Base", started_at=datetime(2026, 7, 14, 9, 0),
+        segments=[Segment(speaker="A", text="synced", is_owner=True)],
+    )
+    target_dir = cfg.vault_root / "meetings" / "2026"
+    target_dir.mkdir(parents=True)
+    manual = target_dir / "2026-07-14-touch-base.md"
+    manual.write_text("hand-written notes", encoding="utf-8")
+
+    result = vault_writer.write_record(rec, format_record(rec, cfg), cfg)
+
+    assert manual.read_text(encoding="utf-8") == "hand-written notes"
+    assert result.name == "2026-07-14-touch-base-2.md"
+
+
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
