@@ -70,9 +70,18 @@ If the user wants their Quill meetings synced into the vault, follow the gated s
    - **`tasks.enabled: true`** — no precondition; the task inbox from Step 3 is used automatically.
 3. Run `python3 <plugin>/connectors/cli.py list-pending --config <config>` — it should list the user's recent meetings. If it errors, stop and report.
 4. Run `sync --config <config>`, then verify markdown files appeared in the vault's routed folder.
-5. If the user wants it automatic, run `install-schedule --config <config>` and verify the job registered (macOS: `launchctl list | grep knowledge-vault`; Windows: `schtasks /Query /TN knowledge-vault-quill-sync`; Linux: `crontab -l | grep knowledge-vault`). The schedule runs only while the machine is awake; job logs land in `~/Library/Logs/knowledge-vault/` on macOS.
+5. If the user wants it automatic, run `install-schedule --config <config>`. This registers **two** jobs: the sync (every `schedule_sync_hours`, default hourly) and — because `schedule_verify` defaults to true — a weekly verify audit (Friday 15:00) that catches missing or truncated transcripts. Verify **both** registered:
+   - macOS: `launchctl list | grep knowledge-vault` → `com.knowledge-vault.quill-sync` and `com.knowledge-vault.quill-verify`
+   - Windows: `schtasks /Query /TN knowledge-vault-quill-sync` and `schtasks /Query /TN knowledge-vault-quill-verify`
+   - Linux: `crontab -l | grep knowledge-vault` → two lines
+
+   The schedule runs only while the machine is awake; job logs land in `~/Library/Logs/knowledge-vault/` on macOS. That is the complete set of scheduled jobs this plugin creates — nothing else needs installing.
 
 The connector reads Quill's database directly — do **not** install or require any Quill MCP server for syncing. If the user separately wants interactive Quill tools (search meetings, fetch transcripts in conversation), Quill ships an MCP bridge in the same app-data directory (`mcp-stdio-bridge.js`). That needs Node installed. You can register it yourself: add to the project's `.mcp.json` a `quill` server with `"command": "node"` and the absolute bridge path as the single arg (exact JSON in [`connectors/README.md` → Quick start (Quill)](connectors/README.md#quick-start-quill)), then have the user restart the Claude Code session so the `mcp__quill__*` tools load.
+
+## Step 6 (optional) — the rest of the self-driving loop
+
+Everything above is this plugin's full automation surface: hooks (index rebuild, cache cleanup, write guards) activate automatically on install with nothing to configure, and Step 5 covers both scheduled jobs. If the user wants the *complete* self-driving system — Gmail and Calendar feeding the same CSV CRM on their own schedules — that lives in the companion [elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace) plugin, which has its own `INSTALL_FOR_AGENTS.md`. Offer it; don't install it unprompted.
 
 ## Notes
 
