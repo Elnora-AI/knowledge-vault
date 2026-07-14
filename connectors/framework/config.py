@@ -172,6 +172,7 @@ class ConnectorConfig:
     derive_names_from_email: bool = True
     schedule_sync_hours: int = 1
     schedule_verify: bool = True
+    verify_exempt_markers: list[str] = field(default_factory=list)
     env_file: str = ""
     state_dir: Path | None = None
 
@@ -219,6 +220,7 @@ class ConnectorConfig:
             derive_names_from_email=bool(data.get("derive_names_from_email", True)),
             schedule_sync_hours=max(1, int(data.get("schedule_sync_hours", 1))),
             schedule_verify=bool(data.get("schedule_verify", True)),
+            verify_exempt_markers=list(data.get("verify_exempt_markers", [])),
             env_file=data.get("env_file", ""),
             state_dir=Path(state_dir).resolve() if state_dir else None,
         )

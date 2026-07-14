@@ -10,6 +10,10 @@ record id in frontmatter (any key in ``id_keys``) and categorize:
 - ``pending``     — the source has the record but the syncer hasn't processed
                     it yet (e.g. still in the cooldown window). Not a failure.
 - ``ok``          — healthy.
+
+Files whose content matches any ``verify_exempt_markers`` regex are counted
+``ok`` without section or truncation checks — for hand-curated replacements
+(e.g. corrected re-transcriptions) that deliberately drop the standard layout.
 """
 
 from __future__ import annotations
@@ -70,6 +74,7 @@ def verify(source: Source, cfg: ConnectorConfig, since: date | None = None,
     index = _index_vault_by_record_id(cfg.vault_root, cfg.id_keys)
     refs = source.list_pending(since, 0, cfg.max_age_days)
     processed_ids = processed_ids or set()
+    exempt = [re.compile(p, re.MULTILINE) for p in cfg.verify_exempt_markers]
 
     for ref in refs:
         path = index.get(ref.id)
@@ -83,6 +88,9 @@ def verify(source: Source, cfg: ConnectorConfig, since: date | None = None,
                 result.pending.append(ref.id)
             continue
         content = path.read_text(encoding="utf-8")
+        if any(p.search(content) for p in exempt):
+            result.ok.append(ref.id)
+            continue
         if "## Transcript" not in content:
             result.malformed.append(ref.id)
             continue

@@ -323,6 +323,34 @@ def test_verifier_matches_custom_id_keys(tmp_path):
     assert r.ok == ["r1"] and not r.failed
 
 
+def test_verifier_exempt_markers_skip_section_and_truncation_checks(tmp_path):
+    from connectors.framework import verifier
+
+    cfg = make_config(tmp_path, verify_exempt_markers=[r"^# Curated verbatim"])
+    folder = cfg.vault_root / "meetings"
+    folder.mkdir(parents=True)
+    # A hand-curated replacement: no ## Transcript section, much shorter
+    # than the source — would be malformed without the exemption.
+    (folder / "2026-03-10-curated.md").write_text(
+        "---\ntitle: \"Curated\"\nrecord_id: \"r1\"\n---\n\n# Curated verbatim\n\nShort.",
+        encoding="utf-8",
+    )
+    src_dir = tmp_path / "records"
+    src_dir.mkdir()
+    (src_dir / "r1.json").write_text(json.dumps({
+        "id": "r1", "title": "Curated", "started_at": "2026-03-10T15:00:00", "ready": True,
+        "segments": [{"speaker": "A", "text": "Some real content here to exceed the empty threshold. " * 20}],
+    }), encoding="utf-8")
+
+    r = verifier.verify(JsonFolderSource(src_dir), cfg, None, processed_ids={"r1"})
+    assert r.ok == ["r1"] and not r.failed
+
+    # Without markers the same file is malformed.
+    cfg.verify_exempt_markers = []
+    r = verifier.verify(JsonFolderSource(src_dir), cfg, None, processed_ids={"r1"})
+    assert r.malformed == ["r1"] and r.failed
+
+
 # ---------------------------------------------------------------------------
 # Config loading
 # ---------------------------------------------------------------------------

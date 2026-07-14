@@ -48,6 +48,7 @@
 
   "schedule_sync_hours": 1,
   "schedule_verify": true,
+  "verify_exempt_markers": [],
   "env_file": "",
 
   "_comment_vault_root": "The vault root is read from .claude/knowledge-base.local.md. Set 'vault_root' here only to override it.",
@@ -55,5 +56,6 @@
   "_comment_llm": "LLM formatting is optional. When llm_enabled is true, provide ANTHROPIC_API_KEY (or AZURE_ANTHROPIC_ENDPOINT + AZURE_ANTHROPIC_API_KEY, or ANTHROPIC_GATEWAY_URL + ANTHROPIC_GATEWAY_KEY) in the environment — or point env_file at a file that exports it. llm_verbatim adds a second call that formats the FULL verbatim transcript.",
   "_comment_crm": "CRM is optional and column-driven: only columns that exist in your CSV headers are ever written. Registries map LLM enrichment categories to CSV files; paths are vault-root-relative. The CSVs must already exist with a header row.",
   "_comment_tasks": "When tasks.enabled is true, extracted action items are appended to your task inbox. inbox defaults to task_inbox from .claude/knowledge-base.local.md; set it here (vault-relative) to override.",
-  "_comment_schedule": "install-schedule registers a recurring sync every schedule_sync_hours (launchd / Task Scheduler / cron) and, when schedule_verify is true, a weekly verify. Secrets are never written into job definitions — use env_file."
+  "_comment_schedule": "install-schedule registers a recurring sync every schedule_sync_hours (launchd / Task Scheduler / cron) and, when schedule_verify is true, a weekly verify. Secrets are never written into job definitions — use env_file.",
+  "_comment_verify_exempt": "verify_exempt_markers is a list of regexes (MULTILINE). A vault file matching any of them is counted ok by verify without section/truncation checks — for hand-curated replacement files that deliberately drop the standard layout."
 }
