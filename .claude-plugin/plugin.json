@@ -1,6 +1,6 @@
 {
   "name": "knowledge-base",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Obsidian vault power tools for Claude Code — search and save your work, Flavored Markdown, Bases dashboards, Canvas diagrams, document versioning, a task system, cross-agent coordination, and an auto-maintained index. Config-driven and universal.",
   "author": {
     "name": "Elnora AI",
@@ -10,5 +10,15 @@
   "homepage": "https://github.com/Elnora-AI/knowledge-vault",
   "repository": "https://github.com/Elnora-AI/knowledge-vault",
   "license": "Apache-2.0",
-  "keywords": ["vault", "obsidian", "markdown", "bases", "canvas", "notes", "tasks", "knowledge-base", "context"]
+  "keywords": [
+    "vault",
+    "obsidian",
+    "markdown",
+    "bases",
+    "canvas",
+    "notes",
+    "tasks",
+    "knowledge-base",
+    "context"
+  ]
 }

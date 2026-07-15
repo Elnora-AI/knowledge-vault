@@ -11,9 +11,15 @@
       "name": "knowledge-base",
       "description": "Search and save your work in an Obsidian vault — Flavored Markdown, Bases, Canvas, versioning, a task system, cross-agent coordination, and an auto-maintained index. Config-driven and universal.",
       "source": "./",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
-      "tags": ["vault", "obsidian", "notes", "tasks", "knowledge-base"]
+      "tags": [
+        "vault",
+        "obsidian",
+        "notes",
+        "tasks",
+        "knowledge-base"
+      ]
     }
   ]
 }
