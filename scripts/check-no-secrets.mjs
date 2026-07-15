@@ -136,6 +136,7 @@ for (const path of files) {
     continue;
   }
   const lines = content.split("\n");
+  let inFamilyBlock = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lower = line.toLowerCase();
@@ -158,8 +159,16 @@ for (const path of files) {
       violations.push(`${rel}:${i + 1}  [non-placeholder email]  ${em}`);
     }
 
+    // The ELNORA-FAMILY block is the sanctioned cross-link section to sibling
+    // family repos — its whole purpose is to name them — so exempt it from the
+    // brand rule (every other check still applies). New family members need no
+    // allowlist edit.
+    if (/<!--\s*elnora-family:start\s*-->/i.test(line)) inFamilyBlock = true;
+    const brandExempt = inFamilyBlock;
+    if (/<!--\s*elnora-family:end\s*-->/i.test(line)) inFamilyBlock = false;
+
     // The maintainer brand outside its metadata allowlist.
-    if (lower.includes("elnora")) {
+    if (!brandExempt && lower.includes("elnora")) {
       let stripped = lower;
       for (const allowed of ALLOWED_ELNORA) stripped = stripped.split(allowed).join("");
       if (stripped.includes("elnora")) {
