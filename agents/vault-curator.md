@@ -82,7 +82,21 @@ related: []
 
 Add type-specific fields from the schema. Filenames: kebab-case, lowercase; date-prefix (`YYYY-MM-DD-`) only when the content is date-specific. Follow the `file-naming` skill conventions.
 
-For CSVs: match the header and row shape of any existing tracker you are extending. Never rebuild a tracker from scratch when you can append/update rows.
+For CSVs: match the header and row shape of any existing tracker you are extending. Never rebuild a tracker from scratch when you can append/update rows. Editing CSV rows by hand is error-prone — follow the quoting contract below exactly.
+
+### CSV quoting contract (read before touching any .csv)
+
+You edit CSVs as raw text, so nothing escapes quotes for you. A malformed row still parses as a "valid file, wrong data" — no error is raised, and the corrupted record silently becomes the record of record. Get this right on the first write.
+
+1. **Escape a quote by doubling it: `""`.** CSV has no backslash escape. Writing `\"like this\"` is a bug that adds a phantom column.
+   - Wrong: `"...subject \"Q3 report\" was sent..."`
+   - Right: `"...subject ""Q3 report"" was sent..."`
+2. **Any inner `"` inside an already-quoted field must be doubled** — including quotes you introduce mid-edit when quoting an email subject, a document title, or someone's words. This is the most common break: the undoubled quote terminates the field early and spills the remainder into a junk record on the next line.
+3. **Match the file's existing quoting style.** These trackers are typically written with every field quoted (`QUOTE_ALL`). Keep it — do not "tidy" quotes off fields.
+4. **A record may legitimately span multiple physical lines.** Embedded newlines inside a quoted field are valid CSV; a long notes field wrapping across lines is normal and is *not* the bug. Judge correctness by column count, never by line count.
+5. **Commas and newlines inside a field are fine** as long as the field stays quoted.
+
+**Verify before you report.** After editing any CSV, `Read` the region you changed and confirm: the record starts with its opening `"` and ends with a closing `"`, each field delimiter is `","`, and the field count matches the header. If a stray fragment appears on its own line without a leading field, you broke the quoting — fix it before reporting. Never report a CSV write as done without reading it back.
 
 ## Step 4 — Related-doc links
 
