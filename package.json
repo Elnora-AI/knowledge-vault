@@ -1,6 +1,6 @@
 {
   "name": "knowledge-vault",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Obsidian vault power tools for Claude Code — tooling and CI for the knowledge-base plugin marketplace.",
   "license": "Apache-2.0",

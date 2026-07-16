@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.1](https://github.com/Elnora-AI/knowledge-vault/compare/v1.2.0...v1.2.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **agents:** stop vault-curator corrupting CSVs with invalid quote escaping ([#21](https://github.com/Elnora-AI/knowledge-vault/issues/21)) ([9ce8ca8](https://github.com/Elnora-AI/knowledge-vault/commit/9ce8ca875f1891bc9810405ddedad3ad973f4014))
+
 ## [1.2.0](https://github.com/Elnora-AI/knowledge-vault/compare/v1.1.0...v1.2.0) (2026-07-15)
 
 
