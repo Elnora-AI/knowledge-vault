@@ -30,8 +30,14 @@ const TEXT_EXT = new Set([
   ".txt", ".toml", ".sh", ".ps1", ".cfg", ".ini", ".html", ".css", "",
 ]);
 
-// This guard necessarily contains the patterns it searches for.
-const SKIP_FILES = new Set(["scripts/check-no-secrets.mjs"]);
+// This guard necessarily contains the patterns it searches for. The
+// release-dispatch workflow is infrastructure (not tool content) and
+// necessarily names the maintainer's internal release orchestrator, so it is
+// exempt from the brand scan like other infra workflows.
+const SKIP_FILES = new Set([
+  "scripts/check-no-secrets.mjs",
+  ".github/workflows/release-dispatch.yml",
+]);
 
 // "elnora" (the maintainer brand) may appear ONLY in these metadata strings.
 // This includes the "Part of the Elnora family" cross-links to sibling public
