@@ -2,7 +2,7 @@
 name: update-knowledgebase
 description: Save this session's work results into the vault — synthesize what we did, then dispatch the vault-curator agent to file it in the correct folders with frontmatter and links, or update existing trackers/READMEs.
 argument-hint: [optional — focus or scope, e.g. "just the finance work"]
-allowed-tools: Read, Glob, Grep, Task, AskUserQuestion
+allowed-tools: Read, Glob, Grep, Task, AskUserQuestion, Bash
 ---
 
 # Update the Knowledge Base from this Session
@@ -46,9 +46,43 @@ If the user adjusts, note the adjustments for Step 5.
 
 Dispatch **vault-curator** again with the **approved plan** (with any adjustments) and **mode: execute**. It creates folders, writes new files, updates existing trackers/READMEs/CSVs, refreshes `updated:` dates, and adds `related:` links.
 
-## Step 6 — Report
+## Step 6 — Verify any CSV the curator touched
 
-Relay the curator's report: every path created or updated, folders made, links added, and anything skipped (and why). Plain, concise, no emojis.
+The curator edits CSVs as raw text and has no shell to check its own work, so you do it. If its report lists **no** `.csv` paths, skip this step.
+
+Run this against each `.csv` it created or updated:
+
+```bash
+python3 -c "
+import csv, sys
+p = sys.argv[1]
+raw = open(p, encoding='utf-8').read()
+rows = [r for r in csv.reader(open(p, encoding='utf-8')) if r]
+hdr = len(rows[0])
+bad = [(i + 1, len(r)) for i, r in enumerate(rows) if len(r) != hdr]
+esc = raw.count(chr(92) + chr(34))
+stray = [(i + 1, f[:40]) for i, r in enumerate(rows) for f in r if chr(92) in f]
+ok = not bad and not esc and not stray
+print(f'{p}: {len(rows)-1} rows, {hdr} cols, malformed={len(bad)}, backslash-escapes={esc} -> ' + ('PASS' if ok else 'FAIL'))
+if bad: print('   bad rows:', bad[:5])
+if stray: print('   fields with backslash:', stray[:5])
+" "<csv-path>"
+```
+
+(Use `python` instead of `python3` where that is the interpreter on PATH, e.g. Windows.)
+
+`PASS` is the only acceptable result. The check covers the two ways the quoting breaks, and it needs both arms:
+
+- **`malformed>0`** — an inner `"` wasn't doubled, so a field terminated early and spilled the remainder into a junk record.
+- **`backslash-escapes>0`** — a `\"` backslash-escape. **A column-count check alone does not catch this.** The mangled field usually keeps the right column count and only shifts columns when a comma happens to follow the break, so the row reads as clean while its contents are silently corrupted. This arm is why the check scans the raw text, not just the parsed shape.
+
+Malformed rows land next to whatever the curator just edited, so the reported paths point straight at the culprit.
+
+If it fails, fix the escaping (double the inner quotes — see the CSV quoting contract in the curator's instructions), re-run until it passes, then read the repaired rows back through `csv.DictReader` and confirm the field contents actually survived — a passing check proves the shape is legal, not that the text is right. Tell the user it broke and that you fixed it; do not silently repair and report success.
+
+## Step 7 — Report
+
+Relay the curator's report: every path created or updated, folders made, links added, and anything skipped (and why). Plain, concise, no emojis. Include the outcome of any CSV verification from Step 6.
 
 ## Notes
 - Prefer updating existing trackers/READMEs over creating new files; create folders only when genuinely needed.
