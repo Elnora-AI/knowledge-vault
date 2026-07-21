@@ -1,4 +1,4 @@
 # The connector framework runs on the Python standard library alone.
 # Only the OPTIONAL LLM formatting path needs this dependency; install it only
 # if you set "llm_enabled": true in your connector config.
-anthropic>=0.116.0 ; extra == "llm"
+anthropic>=0.117.0 ; extra == "llm"
