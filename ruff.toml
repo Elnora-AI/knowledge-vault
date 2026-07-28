@@ -1,0 +1,9 @@
+# Lint rules for `ruff check hooks connectors` (see .github/workflows/ci.yml).
+#
+# CI installs ruff unpinned, so without this file the gate is whatever ruff
+# currently defaults to. Ruff 0.16 broadened its default selection and CI began
+# failing on 63 pre-existing findings that had nothing to do with the PRs under
+# test. Declaring the selection here keeps the gate stable across ruff releases;
+# widening it is a deliberate change, not a side effect of a dependency bump.
+[lint]
+select = ["E4", "E7", "E9", "F"]
