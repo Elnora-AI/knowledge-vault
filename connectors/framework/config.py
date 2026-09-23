@@ -76,7 +76,7 @@ def load_env_file(path: str | Path) -> None:
     """Load KEY=VALUE lines from an env file into os.environ (no overwrite).
 
     Scheduled jobs don't inherit an interactive shell, so a connector config can
-    point at an env file holding e.g. ANTHROPIC_API_KEY. Secrets stay in that
+    point at an env file holding e.g. OPENROUTER_API_KEY. Secrets stay in that
     file — they are never copied into scheduler job definitions.
     """
     p = Path(path).expanduser()
@@ -163,7 +163,7 @@ class ConnectorConfig:
     min_age_minutes: int = 0
     max_age_days: int = 30
     llm_enabled: bool = False
-    llm_model: str = "claude-sonnet-5"
+    llm_model: str = "openrouter/auto"
     llm_verbatim: bool = True  # second LLM call: full verbatim formatted body
     crm: CrmConfig = field(default_factory=CrmConfig)
     tasks_enabled: bool = False
@@ -211,7 +211,7 @@ class ConnectorConfig:
             min_age_minutes=int(data.get("min_age_minutes", 0)),
             max_age_days=int(data.get("max_age_days", 30)),
             llm_enabled=bool(data.get("llm_enabled", False)),
-            llm_model=data.get("llm_model", "claude-sonnet-5"),
+            llm_model=data.get("llm_model", "openrouter/auto"),
             llm_verbatim=bool(data.get("llm_verbatim", True)),
             crm=CrmConfig.from_dict(data.get("crm")),
             tasks_enabled=bool(tasks_data.get("enabled", False)),
