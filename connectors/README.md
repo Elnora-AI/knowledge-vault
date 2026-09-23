@@ -94,7 +94,7 @@ Return framework `Record` / `Person` / `Segment` objects (see `framework/models.
 
 ## LLM formatting (optional)
 
-Set `"llm_enabled": true` and provide `ANTHROPIC_API_KEY` in the environment (`pip install anthropic`), or point `env_file` at a file that exports it. Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) and generic gateways (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`) are supported too. Two calls per record:
+Set `"llm_enabled": true` and provide `OPENROUTER_API_KEY` in the environment (`pip install anthropic`; the SDK talks to OpenRouter's Anthropic-compatible endpoint), or point `env_file` at a file that exports it. The default `llm_model` is `openrouter/auto`, OpenRouter's automatic routing. Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) and generic gateways (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`) are supported too; set `llm_model` to a model id they serve. Two calls per record:
 
 1. **Metadata** — summary, record type (classified against your route keys), tags, external organizations, action items, and (when CRM is on) per-participant enrichment facts. Strict JSON, retried on transient errors.
 2. **Verbatim body** (`llm_verbatim`, default on) — the complete formatted transcript as plain text, with an escalating output-token budget on truncation. Multilingual records stay in their original language.
@@ -135,4 +135,4 @@ python3 connectors/cli.py install-schedule   --config cfg.json
 python3 connectors/cli.py uninstall-schedule --config cfg.json
 ```
 
-Registers the sync on your OS's native scheduler — a launchd LaunchAgent (macOS), a Task Scheduler task (Windows), or a user crontab line (Linux) — every `schedule_sync_hours`, plus a weekly `verify` job when `schedule_verify` is true. Secrets are never written into job definitions; put `ANTHROPIC_API_KEY` in a file referenced by `env_file` instead. If the native scheduler can't be driven, the exact command is printed for manual setup.
+Registers the sync on your OS's native scheduler — a launchd LaunchAgent (macOS), a Task Scheduler task (Windows), or a user crontab line (Linux) — every `schedule_sync_hours`, plus a weekly `verify` job when `schedule_verify` is true. Secrets are never written into job definitions; put `OPENROUTER_API_KEY` in a file referenced by `env_file` instead. If the native scheduler can't be driven, the exact command is printed for manual setup.
