@@ -3,8 +3,8 @@
 Two modes:
   - Passthrough (default, zero dependencies): derive a title-based type, no tags,
     and use the record's own transcript text. Always available.
-  - LLM (optional): if `llm_enabled` and the `anthropic` SDK + a provider key
-    are present (OpenRouter by default), run a two-call pipeline:
+  - LLM (optional): if `llm_enabled` and the `anthropic` SDK + an API key are
+    present, run a two-call pipeline:
       Call 1 — metadata (summary, type, tags, entities, action items, and — when
                CRM is enabled — per-participant enrichment facts) as strict JSON.
       Call 2 — the full verbatim transcript as PLAIN TEXT (`llm_verbatim`),
@@ -54,7 +54,7 @@ def _anthropic_client(cfg: ConnectorConfig):
     # 30 min request timeout: long records can stream 60K+ tokens, which
     # exceeds the SDK default when the connection is slow.
     timeout_s = 1800.0
-    # Optional enterprise gateway speaking the Anthropic Messages API.
+    # Optional enterprise gateway; otherwise the SDK reads ANTHROPIC_API_KEY.
     endpoint = os.environ.get("ANTHROPIC_GATEWAY_URL")
     if endpoint and os.environ.get("ANTHROPIC_GATEWAY_KEY"):
         try:
@@ -65,7 +65,7 @@ def _anthropic_client(cfg: ConnectorConfig):
         except Exception:
             return None
     # OpenRouter's Anthropic-compatible endpoint (the SDK appends /v1/messages).
-    # `llm_model` defaults to `openrouter/auto`, OpenRouter's automatic routing.
+    # Set `llm_model` to `openrouter/auto` for OpenRouter's automatic routing.
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     if openrouter_key:
         try:
@@ -91,7 +91,12 @@ def _anthropic_client(cfg: ConnectorConfig):
             )
         except Exception:
             return None
-    return None
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    try:
+        return anthropic.Anthropic(timeout=timeout_s)
+    except Exception:
+        return None
 
 
 def _strip_v1(endpoint: str) -> str:
