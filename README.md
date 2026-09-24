@@ -135,13 +135,17 @@ gw calendar sync-crm-install  # schedule calendar → CRM
 
 Read [`SAFETY.md`](SAFETY.md). In short: a write hook only ever *reads* your config, the plugin never deletes or overwrites documents (it versions them), your real `vault_path` is gitignored, and no secrets are stored or transmitted. The plugin's scripts and hooks talk to your local filesystem only; the sole exception is `/note`, which uses Claude Code's built-in `WebFetch` on the URL you provide.
 
----
+## License
+
+[Apache-2.0](LICENSE). Maintained by [Elnora AI](https://github.com/Elnora-AI). Contributions welcome — see [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
 ## Part of the Elnora family
 
-Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — free, universal, config-driven tools that wire Claude Code (or any AI coding agent) into the systems you run your company on. Each works 100% standalone; install several and they chain into end-to-end workflows.
+Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — free, universal, config-driven tools that wire Claude Code (or any AI coding agent) into the systems you run your company on. Each works 100% standalone; install several and they chain into end-to-end workflows. Take them all and you have the same system Elnora runs on internally.
 
 <!-- ELNORA-FAMILY:START -->
+- [elnora-starter-kit](https://github.com/Elnora-AI/elnora-starter-kit) — one-line Claude Code + Elnora install for biologists and non-technical founders; doubles as a starter template for any new Claude Code project
+- [elnora-ai-agent-hackathon-starter-kit](https://github.com/Elnora-AI/elnora-ai-agent-hackathon-starter-kit) — one command to your first AI agents (Claude Code or Codex), built for the Elnora AI agent hackathon
 - [elnora-linear](https://github.com/Elnora-AI/elnora-linear) — Linear issue management — search, bulk edit, agents, and a config-driven curator
 - [elnora-slack](https://github.com/Elnora-AI/elnora-slack) — the entire Slack Web API as a CLI plus agent skills with a draft-and-approve send gate
 - [elnora-whatsapp](https://github.com/Elnora-AI/elnora-whatsapp) — read, search, and send WhatsApp from your own paired account, 100% local
@@ -151,8 +155,6 @@ Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — fre
 - [elnora-luma](https://github.com/Elnora-AI/elnora-luma) — Luma (lu.ma) events — all 61 public API endpoints as a spec-driven CLI with safety guardrails
 - [elnora-travel](https://github.com/Elnora-AI/elnora-travel) — a real travel agent — live flights, hotels, Airbnb, Booking.com, and routes in one itinerary
 - [elnora-websearch-tools](https://github.com/Elnora-AI/elnora-websearch-tools) — web search — Exa, Tavily, Perplexity, Firecrawl, and Valyu CLIs and skills in one plugin
+
+The Elnora platform itself — the AI agent for lab work — is open too: [elnora-cli](https://github.com/Elnora-AI/elnora-cli) (the Elnora CLI), [elnora-mcp-server](https://github.com/Elnora-AI/elnora-mcp-server) (the Elnora MCP server), [elnora-plugins](https://github.com/Elnora-AI/elnora-plugins) (the Elnora plugin marketplace), [homebrew-cli](https://github.com/Elnora-AI/homebrew-cli) (the Homebrew tap for the CLI).
 <!-- ELNORA-FAMILY:END -->
-
-## License
-
-[Apache-2.0](LICENSE). Maintained by [Elnora AI](https://github.com/Elnora-AI). Contributions welcome — see [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md).
