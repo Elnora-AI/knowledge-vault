@@ -94,7 +94,21 @@ Return framework `Record` / `Person` / `Segment` objects (see `framework/models.
 
 ## LLM formatting (optional)
 
-Set `"llm_enabled": true` and provide `ANTHROPIC_API_KEY` in the environment (`pip install anthropic`), or point `env_file` at a file that exports it. Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) generic gateways (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`) and OpenRouter (`OPENROUTER_API_KEY`; set `llm_model` to `openrouter/auto` for automatic routing, or any OpenRouter model id) are supported too. Use whichever key you have. Two calls per record:
+Set `"llm_enabled": true` and provide **one LLM API key, from any provider**, in the environment or in a file `env_file` points at. The connector picks the provider from the key it finds:
+
+| Provider | Env var | Default model |
+|---|---|---|
+| Anthropic (`pip install anthropic`) | `ANTHROPIC_API_KEY` | `claude-sonnet-5` |
+| OpenAI | `OPENAI_API_KEY` | `gpt-5` |
+| Google Gemini | `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` | `gemini-flash-latest` |
+| OpenRouter | `OPENROUTER_API_KEY` | `openrouter/auto` (picks a model per request) |
+| Groq | `GROQ_API_KEY` | `openai/gpt-oss-120b` |
+| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-chat` |
+| xAI | `XAI_API_KEY` | `grok-4.7` |
+| Mistral | `MISTRAL_API_KEY` | `mistral-large-latest` |
+| Anything OpenAI-compatible (Azure OpenAI, Together, Fireworks, LiteLLM, vLLM, Ollama, …) | `LLM_BASE_URL` + `LLM_API_KEY` + `llm_model` | — |
+
+With several keys set, `llm_provider` in the config (or `LLM_PROVIDER` in the environment) chooses: `anthropic | openai | google | openrouter | groq | deepseek | xai | mistral | custom`. `llm_model` overrides the provider's default model. Anthropic also works through Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) or a generic gateway (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`). Only the Anthropic provider needs a package; the others run on the standard library. `sync` prints the provider and model in use, and the reason if it can't call one. Two calls per record:
 
 1. **Metadata** — summary, record type (classified against your route keys), tags, external organizations, action items, and (when CRM is on) per-participant enrichment facts. Strict JSON, retried on transient errors.
 2. **Verbatim body** (`llm_verbatim`, default on) — the complete formatted transcript as plain text, with an escalating output-token budget on truncation. Multilingual records stay in their original language.
@@ -135,4 +149,4 @@ python3 connectors/cli.py install-schedule   --config cfg.json
 python3 connectors/cli.py uninstall-schedule --config cfg.json
 ```
 
-Registers the sync on your OS's native scheduler — a launchd LaunchAgent (macOS), a Task Scheduler task (Windows), or a user crontab line (Linux) — every `schedule_sync_hours`, plus a weekly `verify` job when `schedule_verify` is true. Secrets are never written into job definitions; put `ANTHROPIC_API_KEY` in a file referenced by `env_file` instead. If the native scheduler can't be driven, the exact command is printed for manual setup.
+Registers the sync on your OS's native scheduler — a launchd LaunchAgent (macOS), a Task Scheduler task (Windows), or a user crontab line (Linux) — every `schedule_sync_hours`, plus a weekly `verify` job when `schedule_verify` is true. Secrets are never written into job definitions; put the LLM API key in a file referenced by `env_file` instead. If the native scheduler can't be driven, the exact command is printed for manual setup.

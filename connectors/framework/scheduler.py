@@ -13,7 +13,7 @@ Two jobs per connector: an hourly-ish ``sync`` (interval from
 ``verify``. A scheduled job does not inherit your interactive shell, so the
 location of ``.claude/knowledge-base.local.md`` is pinned via the
 ``CLAUDE_PROJECT_DIR`` environment variable at install time. Secrets are NOT
-copied into job definitions — put e.g. ``ANTHROPIC_API_KEY`` in an env file
+copied into job definitions — put e.g. ``OPENAI_API_KEY`` in an env file
 and reference it via ``env_file`` in the connector config instead.
 
 If the native scheduler can't be driven, the exact command is printed so the

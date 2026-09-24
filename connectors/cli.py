@@ -36,6 +36,7 @@ from connectors.framework import (  # noqa: E402
     vault_writer,
     verifier,
 )
+from connectors.framework.llm_provider import resolve_provider  # noqa: E402
 from connectors.sources.json_folder import JsonFolderSource  # noqa: E402
 from connectors.sources.quill import QuillSource  # noqa: E402
 
@@ -74,6 +75,8 @@ def _id_index(cfg: ConnectorConfig) -> dict[str, Path]:
 # ---------------------------------------------------------------------------
 
 def cmd_sync(args, cfg, source) -> int:
+    if cfg.llm_enabled:
+        print("LLM: " + resolve_provider(cfg.llm_provider, cfg.llm_model).describe(), file=sys.stderr)
     engine = SyncEngine(source, cfg)
     result = engine.sync(limit=args.limit, dry_run=args.dry_run,
                          since=_parse_since(args.since),
