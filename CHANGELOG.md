@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0](https://github.com/Elnora-AI/knowledge-vault/compare/v1.2.1...v2.0.0) (2026-09-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **connectors:** set OPENROUTER_API_KEY instead of ANTHROPIC_API_KEY. A config that pins llm_model to a bare Claude id such as claude-sonnet-5 needs an OpenRouter id (e.g. openrouter/auto or anthropic/claude-sonnet-5).
+
+### Features
+
+* **connectors:** LLM formatting runs through OpenRouter, and a direct Anthropic key is no longer read ([#39](https://github.com/Elnora-AI/knowledge-vault/issues/39)) ([33bf2cc](https://github.com/Elnora-AI/knowledge-vault/commit/33bf2cca3b6b79de8cb47e556684a289d965668b))
+* **connectors:** OpenRouter is an LLM option next to Anthropic, and the user's key decides ([#41](https://github.com/Elnora-AI/knowledge-vault/issues/41)) ([2da9a83](https://github.com/Elnora-AI/knowledge-vault/commit/2da9a83f1fc06f0acbe3e145a1981776a2c7dce1))
+* **connectors:** the LLM provider is the user's choice, from any key, as in the Slack bot ([#43](https://github.com/Elnora-AI/knowledge-vault/issues/43)) ([077ba8a](https://github.com/Elnora-AI/knowledge-vault/commit/077ba8a42b24c5242ebc8555136ebadd1254ed89))
+
+
+### Bug Fixes
+
+* **connectors:** verify and resync pick the synced file when a note shares its id ([#42](https://github.com/Elnora-AI/knowledge-vault/issues/42)) ([8cba682](https://github.com/Elnora-AI/knowledge-vault/commit/8cba682548da47cff363c41a617e2c1da333aab3))
+
 ## [1.2.1](https://github.com/Elnora-AI/knowledge-vault/compare/v1.2.0...v1.2.1) (2026-07-16)
 
 
