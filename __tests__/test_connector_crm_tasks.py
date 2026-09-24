@@ -323,6 +323,36 @@ def test_verifier_matches_custom_id_keys(tmp_path):
     assert r.ok == ["r1"] and not r.failed
 
 
+def test_verifier_audits_the_synced_file_when_a_note_shares_its_id(tmp_path):
+    from connectors.framework import verifier
+
+    cfg = make_config(tmp_path, id_keys=["record_id", "meeting_id"])
+    folder = cfg.vault_root / "meetings"
+    folder.mkdir(parents=True)
+    synced = folder / "2026-03-10-call.md"
+    synced.write_text(
+        "---\ntitle: \"Call\"\nrecord_id: \"r1\"\n---\n\n## Transcript\n\n"
+        + ("Some real content here to exceed the empty threshold. " * 2),
+        encoding="utf-8",
+    )
+    # A hand-written note about the same meeting, with no transcript section.
+    # Named to sort after the synced file, so a last-one-wins index picks it.
+    (folder / "2026-03-10-call-notes.md").write_text(
+        "---\ntitle: \"Call notes\"\nmeeting_id: \"r1\"\n---\n\n# Notes\n\nShort.",
+        encoding="utf-8",
+    )
+    src_dir = tmp_path / "records"
+    src_dir.mkdir()
+    (src_dir / "r1.json").write_text(json.dumps({
+        "id": "r1", "title": "Call", "started_at": "2026-03-10T15:00:00", "ready": True,
+        "segments": [{"speaker": "A", "text": "Some real content here to exceed the empty threshold."}],
+    }), encoding="utf-8")
+
+    assert verifier._index_vault_by_record_id(cfg.vault_root, cfg.id_keys)["r1"] == synced
+    r = verifier.verify(JsonFolderSource(src_dir), cfg, None, processed_ids={"r1"})
+    assert r.ok == ["r1"] and not r.failed
+
+
 def test_verifier_exempt_markers_skip_section_and_truncation_checks(tmp_path):
     from connectors.framework import verifier
 
