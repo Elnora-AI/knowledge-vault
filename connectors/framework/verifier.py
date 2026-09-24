@@ -57,8 +57,22 @@ def _index_vault_by_record_id(vault_root: Path, id_keys: list[str]) -> dict[str,
             continue
         m = pattern.search(head)
         if m:
-            index[m.group(1).strip()] = path
+            rid = m.group(1).strip()
+            # A hand-written note (a summary, a corrected re-transcription) may
+            # carry the same id as the synced file. Keep the synced one, the
+            # file with the ``## Transcript`` section, whichever the walk meets
+            # first, so verify audits it and resync never deletes the note.
+            prev = index.get(rid)
+            if prev is None or (not _is_synced(prev) and _is_synced(path)):
+                index[rid] = path
     return index
+
+
+def _is_synced(path: Path) -> bool:
+    try:
+        return "## Transcript" in path.read_text(encoding="utf-8")
+    except OSError:
+        return False
 
 
 def verify(source: Source, cfg: ConnectorConfig, since: date | None = None,

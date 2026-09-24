@@ -66,20 +66,7 @@ def _parse_since(value: str | None):
 # ---------------------------------------------------------------------------
 
 def _id_index(cfg: ConnectorConfig) -> dict[str, Path]:
-    pattern = re.compile(
-        r'^(?:' + "|".join(re.escape(k) for k in cfg.id_keys) + r'):\s*"?([^"\n]+)"?\s*$',
-        re.MULTILINE,
-    )
-    index: dict[str, Path] = {}
-    for path in cfg.vault_root.rglob("*.md"):
-        try:
-            head = path.read_text(encoding="utf-8")[:2000]
-        except OSError:
-            continue
-        m = pattern.search(head)
-        if m:
-            index[m.group(1).strip()] = path
-    return index
+    return verifier._index_vault_by_record_id(cfg.vault_root, cfg.id_keys)
 
 
 # ---------------------------------------------------------------------------

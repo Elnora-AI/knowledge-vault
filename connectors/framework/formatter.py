@@ -64,6 +64,21 @@ def _anthropic_client(cfg: ConnectorConfig):
             )
         except Exception:
             return None
+    # OpenRouter's Anthropic-compatible endpoint (the SDK appends /v1/messages).
+    # Set `llm_model` to `openrouter/auto` for OpenRouter's automatic routing.
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    if openrouter_key:
+        try:
+            return anthropic.Anthropic(
+                base_url="https://openrouter.ai/api", api_key=openrouter_key,
+                default_headers={
+                    "HTTP-Referer": os.environ.get("OPENROUTER_SITE_URL", ""),
+                    "X-Title": os.environ.get("OPENROUTER_APP_NAME", "knowledge-vault"),
+                },
+                timeout=timeout_s,
+            )
+        except Exception:
+            return None
     # Azure AI Services uses the same x-api-key auth header as the direct API,
     # so the SDK works natively — just set base_url and api_key.
     azure_endpoint = os.environ.get("AZURE_ANTHROPIC_ENDPOINT")

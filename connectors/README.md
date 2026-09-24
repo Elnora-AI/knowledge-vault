@@ -94,7 +94,7 @@ Return framework `Record` / `Person` / `Segment` objects (see `framework/models.
 
 ## LLM formatting (optional)
 
-Set `"llm_enabled": true` and provide `ANTHROPIC_API_KEY` in the environment (`pip install anthropic`), or point `env_file` at a file that exports it. Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) and generic gateways (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`) are supported too. Two calls per record:
+Set `"llm_enabled": true` and provide `ANTHROPIC_API_KEY` in the environment (`pip install anthropic`), or point `env_file` at a file that exports it. Azure AI Services (`AZURE_ANTHROPIC_ENDPOINT` + `AZURE_ANTHROPIC_API_KEY`) generic gateways (`ANTHROPIC_GATEWAY_URL` + `ANTHROPIC_GATEWAY_KEY`) and OpenRouter (`OPENROUTER_API_KEY`; set `llm_model` to `openrouter/auto` for automatic routing, or any OpenRouter model id) are supported too. Use whichever key you have. Two calls per record:
 
 1. **Metadata** — summary, record type (classified against your route keys), tags, external organizations, action items, and (when CRM is on) per-participant enrichment facts. Strict JSON, retried on transient errors.
 2. **Verbatim body** (`llm_verbatim`, default on) — the complete formatted transcript as plain text, with an escalating output-token budget on truncation. Multilingual records stay in their original language.
