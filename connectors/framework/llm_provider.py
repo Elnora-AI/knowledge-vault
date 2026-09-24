@@ -1,6 +1,6 @@
 """Which LLM provider formats records. Any key drives it.
 
-The provider is picked in this order, the same way the Elnora Slack bot does:
+The provider is picked in this order:
 
   1. ``llm_provider`` in the connector config, or ``LLM_PROVIDER`` in the
      environment, when set (anthropic | openai | google | openrouter | groq |
