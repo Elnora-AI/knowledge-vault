@@ -1,4 +1,5 @@
 # The connector framework runs on the Python standard library alone.
-# Only the OPTIONAL LLM formatting path needs this dependency; install it only
-# if you set "llm_enabled": true in your connector config.
+# Only the OPTIONAL LLM formatting path with the Anthropic provider needs this
+# dependency; install it only if you set "llm_enabled": true and format with
+# ANTHROPIC_API_KEY. Every other provider runs on the standard library.
 anthropic>=1.7.0 ; extra == "llm"
