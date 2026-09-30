@@ -76,7 +76,7 @@ def _id_index(cfg: ConnectorConfig) -> dict[str, Path]:
 
 def cmd_sync(args, cfg, source) -> int:
     if cfg.llm_enabled:
-        print("LLM: " + resolve_provider(cfg.llm_provider, cfg.llm_model).describe(), file=sys.stderr)
+        print("LLM: " + resolve_provider(cfg.llm_provider, cfg.llm_model).describe())
     engine = SyncEngine(source, cfg)
     result = engine.sync(limit=args.limit, dry_run=args.dry_run,
                          since=_parse_since(args.since),
@@ -97,7 +97,7 @@ def cmd_sync(args, cfg, source) -> int:
         extras.append(f"{result.tasks_added} tasks added to inbox")
     if extras:
         summary += "\n" + ", ".join(extras)
-    print(summary, file=sys.stderr)
+    print(summary)
     return 1 if result.failed else 0
 
 
@@ -111,7 +111,7 @@ def cmd_list_pending(args, cfg, source) -> int:
     for ref in refs:
         when = ref.started_at.strftime("%Y-%m-%d") if ref.started_at else "????-??-??"
         print(f"{when}  {ref.id}  {ref.title}")
-    print(f"\n{len(refs)} pending", file=sys.stderr)
+    print(f"\n{len(refs)} pending")
     return 0
 
 
@@ -145,7 +145,7 @@ def cmd_verify(args, cfg, source) -> int:
         print(f"[FAIL] {len(result.missing) + len(result.truncated) + len(result.malformed)} "
               "issue(s) found", file=sys.stderr)
         return 2
-    print("all healthy", file=sys.stderr)
+    print("all healthy")
     return 0
 
 
