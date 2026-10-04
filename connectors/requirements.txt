@@ -2,4 +2,4 @@
 # Only the OPTIONAL LLM formatting path with the Anthropic provider needs this
 # dependency; install it only if you set "llm_enabled": true and format with
 # ANTHROPIC_API_KEY. Every other provider runs on the standard library.
-anthropic>=1.7.0 ; extra == "llm"
+anthropic>=1.11.0 ; extra == "llm"
