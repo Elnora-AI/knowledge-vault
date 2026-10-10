@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.1](https://github.com/Elnora-AI/knowledge-vault/compare/v2.0.0...v2.0.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **connectors:** status lines go to stdout, stderr keeps the failures ([#47](https://github.com/Elnora-AI/knowledge-vault/issues/47)) ([0dfb937](https://github.com/Elnora-AI/knowledge-vault/commit/0dfb93741f354fd09db96f69dba1ca2d24a38ed9))
+
 ## [2.0.0](https://github.com/Elnora-AI/knowledge-vault/compare/v1.2.1...v2.0.0) (2026-09-24)
 
 
